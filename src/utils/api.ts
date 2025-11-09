@@ -1,74 +1,60 @@
+import { FormSubmissionRequest, UgandaFormSuccessResponse, RegularFormSuccessResponse } from '../types';
+
 const API_BASE_URL = 'https://lavenderblush-jellyfish-670937.hostingersite.com/api';
 // Note: Backend URL endpoint might be 'form-submissons' (with typo) or 'form-submissions'
 const FORM_ENDPOINT = '/form-submissions'; // Try this first, fallback to /form-submissons if needed
 
-interface FormSubmissionPayload {
-  name: string;
-  email: string;
-  country_of_residence: string;
-  been_to_africa_before: boolean;
-  travel_style: string[]; // Changed to array
-  dream_escape_words: string;
-  heard_about_us: string;
-  feature_as_pioneer: string;
-  travel_photo_url: string;
-  travel_month: number;
-  travel_year: number;
-  group_type: string;
-  group_size: number;
-  must_have_experiences: string[];
-  accessibility_dietary_preferences: string;
-  send_options: string;
-  join_early_explorer: boolean;
-  email_opt_in: boolean;
-}
-
-export const submitFormData = async (formData: any): Promise<{ success: boolean; data?: any; error?: string }> => {
+export const submitFormData = async (formData: any): Promise<
+  | { success: true; data: UgandaFormSuccessResponse | RegularFormSuccessResponse }
+  | { success: false; error: string }
+> => {
   try {
     console.log('📋 Raw form data received:', formData);
-    
+
     // Transform form data to match API schema with proper defaults
-    const payload: FormSubmissionPayload = {
+    const payload: FormSubmissionRequest = {
       // From TravellerVibesForm (Step 1)
       name: formData.name || 'Guest User',
       email: formData.email || 'guest@example.com',
       country_of_residence: formData.country || 'Unknown',
       been_to_africa_before: formData.beenToAfrica === 'yes',
-      
+
       // Travel style - MUST BE AN ARRAY (backend expects array, max 3 selections)
       travel_style: Array.isArray(formData.travellerType) && formData.travellerType.length > 0
-        ? formData.travellerType.slice(0, 3).map((type: string) => formatTravelStyle(type))
+        ? formData.travellerType.slice(0, 3).map((type: string) => formatTravelStyle(type) as any)
         : ['adventurer'],
-      
+
       // Heard about us from Step 1
-      heard_about_us: formatReferralSource(formData.hearAbout || []),
-      
+      heard_about_us: formatReferralSource(formData.hearAbout || []) as any,
+
       // Pioneer traveller from Step 1 - Backend expects specific values
       feature_as_pioneer: formData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
-      
+
       // Travel photo from Step 1 - provide valid default URL
       travel_photo_url: formData.photo || 'https://example.com/travel-photo.jpg',
-      
+
       // From DreamTripForm (Step 2)
       dream_escape_words: formData.dreamWords || 'adventure, culture, nature',
-      
-      // Travel dates from Step 2
+
+      // Travel dates from Step 2 - Add full date strings
       travel_month: extractMonthFromDateRange(formData.startDate),
       travel_year: extractYearFromDateRange(formData.startDate),
-      
+      preferred_start_date: formData.startDate || undefined,
+      preferred_end_date: formData.endDate || undefined,
+
       // Group info from Step 2
-      group_type: formData.companion?.toLowerCase() || 'solo',
+      group_type: (formData.companion?.toLowerCase() || 'solo') as any,
       group_size: calculateGroupSize(formData.companion),
-      
+
       // Experiences from Step 2 - MUST BE EXACTLY 3 VALID EXPERIENCES
-      must_have_experiences: formatExperiences(formData.experiences || []),
-      
+      must_have_experiences: formatExperiences(formData.experiences || []) as any,
+
       // Accessibility/dietary preferences
       accessibility_dietary_preferences: formData.preferences || 'None',
-      
+
       // Send options
       send_options: 'both',
-      
+
       // From ExplorerCircleForm (Step 3)
       join_early_explorer: formData.keepUpdated === true,
       email_opt_in: formData.keepUpdated === true,
@@ -188,17 +174,17 @@ function formatTravelStyle(travellerType: string): string {
 }
 
 // Helper function to format referral source
-function formatReferralSource(sources: string[]): string {
+function formatReferralSource(sources: string[]): "tiktok" | "instagram" | "word_of_mouth" | "uk_travel_group" | "event_expo" | "other" {
   if (!sources || sources.length === 0) return 'other';
-  
-  const mapping: { [key: string]: string } = {
+
+  const mapping: { [key: string]: "tiktok" | "instagram" | "word_of_mouth" | "uk_travel_group" | "event_expo" | "other" } = {
     'tiktok': 'tiktok',
     'instagram': 'instagram',
     'word-of-mouth': 'word_of_mouth',
-    'events': 'events',
+    'events': 'event_expo',
     'other': 'other',
   };
-  
+
   return mapping[sources[0]] || 'other';
 }
 

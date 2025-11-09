@@ -19,6 +19,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
   const [formData, setFormData] = React.useState({
     name: initialData.name || '',
     email: initialData.email || '',
+    phone: initialData.phone || '',
     country: initialData.country || '',
     beenToAfrica: initialData.beenToAfrica || '',
     travellerType: initialData.travellerType || [],
@@ -134,12 +135,12 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label 
+                <label
                   className="block text-gray-700 mb-2"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
+                  style={{
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400
                   }}
                 >
                   Your Name
@@ -149,10 +150,10 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  style={{ 
+                  style={{
                     height: '40px',
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
                     fontWeight: 400,
                     maxWidth: '270px'
                   }}
@@ -166,12 +167,12 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <label 
+                <label
                   className="block text-gray-700 mb-2"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
+                  style={{
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400
                   }}
                 >
                   Email Address
@@ -181,10 +182,10 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  style={{ 
+                  style={{
                     height: '40px',
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
                     fontWeight: 400,
                     maxWidth: '270px'
                   }}
@@ -193,6 +194,38 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 />
               </motion.div>
             </div>
+
+            {/* Phone Number */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.35 }}
+            >
+              <label
+                className="block text-gray-700 mb-2"
+                style={{
+                  fontSize: '14px',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 400
+                }}
+              >
+                Phone Number (Optional)
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                style={{
+                  height: '40px',
+                  fontSize: '14px',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 400,
+                  maxWidth: '270px'
+                }}
+                placeholder="+1 (555) 123-4567"
+              />
+            </motion.div>
 
             {/* Country and Africa Experience Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -437,36 +470,33 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.0 }}
             >
-              <label 
+              <label
                 className="block text-gray-700 mb-3"
-                style={{ 
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
+                style={{
+                  fontSize: '14px',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 400
                 }}
               >
                 Would you like to be featured as a Pioneer Traveller?
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, pioneeerTraveller: 'yes' })}
-                  className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                  className={`flex items-center justify-center gap-3 p-3 rounded-lg border-2 transition-all text-center flex-1 min-h-[48px] ${
                     formData.pioneeerTraveller === 'yes'
                       ? 'border-green-500 bg-green-50 text-green-700'
                       : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                   }`}
-                  style={{ 
-                    width: '270px', 
-                    height: '40px'
-                  }}
                 >
                   <span className="text-xl">😊</span>
-                  <span 
-                    style={{ 
-                      fontSize: '14px', 
-                      fontFamily: 'Roboto, sans-serif', 
-                      fontWeight: 400 
+                  <span
+                    className="whitespace-nowrap"
+                    style={{
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, sans-serif',
+                      fontWeight: 400
                     }}
                   >
                     Yes! Feature me.
@@ -475,22 +505,19 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, pioneeerTraveller: 'maybe' })}
-                  className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                  className={`flex items-center justify-center gap-3 p-3 rounded-lg border-2 transition-all text-center flex-1 min-h-[48px] ${
                     formData.pioneeerTraveller === 'maybe'
                       ? 'border-green-500 bg-green-50 text-green-700'
                       : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                   }`}
-                  style={{ 
-                    width: '270px', 
-                    height: '40px'
-                  }}
                 >
                   <span className="text-xl">🤔</span>
-                  <span 
-                    style={{ 
-                      fontSize: '14px', 
-                      fontFamily: 'Roboto, sans-serif', 
-                      fontWeight: 400 
+                  <span
+                    className="whitespace-nowrap"
+                    style={{
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, sans-serif',
+                      fontWeight: 400
                     }}
                   >
                     Maybe later.

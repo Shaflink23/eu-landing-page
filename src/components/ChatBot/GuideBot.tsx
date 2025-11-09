@@ -1,13 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
+
+interface Message {
+  id: number;
+  content: string;
+  isBot: boolean;
+  isTyping: boolean;
+  time: string;
+}
 
 const GuideBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showQuickReplies, setShowQuickReplies] = useState(true);
-  const inputRef = useRef(null);
-  const messagesEndRef = useRef(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const phoneNumber = '256755225525';
 
@@ -33,7 +41,7 @@ const GuideBot = () => {
     });
   };
 
-  const addMessage = (content, isBot = false, isTyping = false) => {
+  const addMessage = (content: string, isBot = false, isTyping = false) => {
     const newMessage = {
       id: Date.now(),
       content,
@@ -44,7 +52,7 @@ const GuideBot = () => {
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const simulateTyping = (callback, delay = 2000) => {
+  const simulateTyping = (callback: () => void, delay = 2000) => {
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
@@ -53,7 +61,7 @@ const GuideBot = () => {
   };
 
 
-  const getBotResponse = (userMessage) => {
+  const getBotResponse = (userMessage: string) => {
     const msg = userMessage.toLowerCase();
     
     // Greeting responses
@@ -102,12 +110,12 @@ const GuideBot = () => {
     };
   };
 
-  const handleQuickReply = (reply) => {
+  const handleQuickReply = (reply: string) => {
     setShowQuickReplies(false);
     addMessage(reply, false);
     
     simulateTyping(() => {
-      const { response, showSuggestions, showWhatsAppButton } = getBotResponse(reply);
+      const { response, showSuggestions } = getBotResponse(reply);
       addMessage(response, true);
       if (showSuggestions) {
         setTimeout(() => setShowQuickReplies(true), 500);
@@ -123,7 +131,7 @@ const GuideBot = () => {
       setMessage('');
       
       simulateTyping(() => {
-        const { response, showSuggestions, showWhatsAppButton } = getBotResponse(userMsg);
+        const { response, showSuggestions } = getBotResponse(userMsg);
         addMessage(response, true);
         if (showSuggestions) {
           setTimeout(() => setShowQuickReplies(true), 500);
@@ -150,7 +158,7 @@ const GuideBot = () => {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -278,7 +286,7 @@ const GuideBot = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about safari packages..."
-                rows="1"
+                rows={1}
                 className="flex-1 bg-transparent border-none outline-none resize-none text-xs leading-5 max-h-20 py-1 placeholder-gray-500"
               />
               <button 

@@ -47,7 +47,6 @@ const contactInfo = [
 
 export const ContactPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   const {
     register,
@@ -155,11 +154,11 @@ export const ContactPage = () => {
                       Skip the waiting and start your booking process right away. Our team will 
                       contact you within 2 hours to finalize the details.
                     </p>
-                    <Button 
-                      onClick={() => setBookingModalOpen(true)}
+                    <Button
                       className="w-full"
+                      disabled
                     >
-                      Start Booking Process
+                      Coming Soon
                     </Button>
                   </CardContent>
                 </Card>
@@ -306,10 +305,10 @@ export const ContactPage = () => {
       </section>
 
       {/* Booking Modal */}
-      <BookingModal
+      {/* <BookingModal
         isOpen={bookingModalOpen}
         onClose={() => setBookingModalOpen(false)}
-      />
+      /> */}
     </div>
   );
 };

@@ -1,5 +1,3 @@
-import * as React from "react";
-
 export const SmallUgBanner = () => {
   return (
     <div className="w-full flex justify-center bg-white">
