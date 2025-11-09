@@ -75,7 +75,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
       if (result.success) {
         console.log('🎉 Submission successful!', result.data);
         // Store the entire API response for display (includes message, data object, etc.)
-        setSubmissionData(result);
+        setSubmissionData(result.data);
         setIsSubmitted(true);
       } else {
         console.error('❌ Submission failed:', result.error);
