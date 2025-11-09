@@ -58,8 +58,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
   const hearAboutOptions = [
     { value: 'tiktok', label: 'TikTok', emoji: '📱' },
     { value: 'instagram', label: 'Instagram', emoji: '📷' },
-    { value: 'word-of-mouth', label: 'Word of Mouth', emoji: '💬' },
-    { value: 'events', label: 'Event(s)', emoji: '🎪' },
+    { value: 'word_of_mouth', label: 'Word of Mouth', emoji: '💬' },
+    { value: 'uk_travel_group', label: 'UK Travel Group', emoji: '🇬🇧' },
+    { value: 'event_expo', label: 'Event/Expo', emoji: '🎪' },
     { value: 'other', label: 'Other', emoji: '⭐' },
   ];
 
