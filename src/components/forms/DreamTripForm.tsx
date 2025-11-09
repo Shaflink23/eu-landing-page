@@ -97,7 +97,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     { value: 'solo', label: 'Solo', subtitle: 'Just me', emoji: '👤' },
     { value: 'couple', label: 'Couple', subtitle: 'Two travelers', emoji: '👫' },
     { value: 'friends', label: 'Friends', subtitle: 'Specify number', emoji: '👥' },
-    { value: 'family', label: 'Family', subtitle: 'Specify number', emoji: '👨‍👩‍👧‍👦' },
+    { value: 'family', label: 'Family', subtitle: 'Specify number', emoji: '�‍👩‍👧‍👦' },
   ];
 
   return (

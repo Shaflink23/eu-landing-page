@@ -17,7 +17,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
   currentStep = 3, 
   totalSteps = 3 
 }) => {
-  const [keepUpdated, setKeepUpdated] = React.useState(false);
+  const [keepUpdated, setKeepUpdated] = React.useState(false); // Email opt-in checkbox state
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -52,7 +52,9 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         travel_year: initialData.startDate ? new Date(initialData.startDate).getFullYear() : new Date().getFullYear(),
         preferred_start_date: initialData.startDate || null,
         preferred_end_date: initialData.endDate || null,
-        group_type: initialData.companion || "solo",
+        group_type: (initialData.companion === 'solo' || initialData.companion === 'couple' || initialData.companion === 'family' || initialData.companion === 'friends')
+          ? (initialData.companion === 'family' || initialData.companion === 'friends' ? 'group' : initialData.companion)
+          : "solo",
         group_size: initialData.companion ? (initialData.companion === 'friends' || initialData.companion === 'family' ? 4 : initialData.companion === 'couple' ? 2 : 1) : 1,
         must_have_experiences: Array.isArray(initialData.experiences) && initialData.experiences.length >= 3
           ? initialData.experiences.slice(0, 3) // Take first 3, ensure exactly 3
@@ -60,7 +62,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         accessibility_dietary_preferences: initialData.preferences || "None",
         send_options: "both",
         join_early_explorer: true, // Always true for Explorer Circle
-        email_opt_in: keepUpdated // Use the checkbox state
+        email_opt_in: keepUpdated // Use the checkbox state - defaults to false unless checked
       };
 
       // Submit to backend API
@@ -72,8 +74,8 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
 
       if (result.success) {
         console.log('🎉 Submission successful!', result.data);
-        // Store the API response data for display
-        setSubmissionData(result.data);
+        // Store the entire API response for display (includes message, data object, etc.)
+        setSubmissionData(result);
         setIsSubmitted(true);
       } else {
         console.error('❌ Submission failed:', result.error);
@@ -115,20 +117,23 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
           </div>
           <h2 className="text-2xl font-semibold text-green-700 mb-3">🎉 Your Uganda Adventure Awaits!</h2>
 
-          {submissionData && (
+          {submissionData && submissionData.data && (
             <div className="text-center mb-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-green-800 font-medium mb-2">
-                  Reference: {submissionData.reference_number}
+                  Reference: {submissionData.data.reference_number}
                 </p>
                 <p className="text-xs text-green-600">
-                  Estimated response time: {submissionData.estimated_response_time}
+                  Estimated response time: {submissionData.data.estimated_response_time}
+                </p>
+                <p className="text-xs text-green-600">
+                  Email confirmation sent to: {initialData?.email}
                 </p>
               </div>
 
               <div className="text-left space-y-2">
                 <h3 className="font-semibold text-gray-800 mb-3">What's Next:</h3>
-                {submissionData.next_steps && submissionData.next_steps.map((step: string, index: number) => (
+                {submissionData.data.next_steps && submissionData.data.next_steps.map((step: string, index: number) => (
                   <div key={index} className="flex items-start gap-2">
                     <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-white text-xs font-bold">{index + 1}</span>
