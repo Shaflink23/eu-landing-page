@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-// import { BookingModal } from '../components/booking/BookingModal';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),

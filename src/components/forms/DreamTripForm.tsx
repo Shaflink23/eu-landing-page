@@ -1,5 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
+import { useFormValidation, dreamTripSchema } from "../../types";
 
 interface DreamTripFormProps {
   onNext: (data: any) => void;
@@ -10,15 +11,22 @@ interface DreamTripFormProps {
   onClose?: () => void;
 }
 
-export const DreamTripForm: React.FC<DreamTripFormProps> = ({ 
-  onNext, 
-  onBack, 
-  initialData, 
-  currentStep = 2, 
-  totalSteps = 3, 
-  onClose 
+export const DreamTripForm: React.FC<DreamTripFormProps> = ({
+  onNext,
+  onBack,
+  initialData,
+  currentStep = 2,
+  totalSteps = 3,
+  onClose
 }) => {
-  const [formData, setFormData] = React.useState({
+  // Initialize form validation with Zod
+  const {
+    data: formData,
+    setFieldValue,
+    setFieldTouched,
+    getFieldError,
+    hasFieldError
+  } = useFormValidation(dreamTripSchema, {
     travelDate: initialData.travelDate || '',
     startDate: initialData.startDate || '',
     endDate: initialData.endDate || '',
@@ -27,91 +35,36 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     dreamWords: initialData.dreamWords || '',
   });
 
-  const [showCalendar, setShowCalendar] = React.useState(false);
-
-  // Generate date options (starting from next month)
-  const generateDateOptions = () => {
-    const options = [];
+  // Calculate minimum date (next month)
+  const getMinDate = () => {
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    
-    for (let i = 0; i < 18; i++) {
-      const date = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + i, 1);
-      const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      options.push({ value: monthYear, label: monthYear });
-    }
-    
-    return options;
-  };
-
-  const dateOptions = generateDateOptions();
-
-  // Generate calendar days for selected month
-  const generateCalendarDays = () => {
-    if (!formData.travelDate) return [];
-    
-    const [monthName, yearStr] = formData.travelDate.split(' ');
-    const monthIndex = new Date(`${monthName} 1, ${yearStr}`).getMonth();
-    const year = parseInt(yearStr);
-    
-    const firstDay = new Date(year, monthIndex, 1);
-    const lastDay = new Date(year, monthIndex + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-    
-    const days = [];
-    
-    // Add empty cells for days before month starts
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push({ day: null, date: null });
-    }
-    
-    // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      days.push({ day, date: dateStr });
-    }
-    
-    return days;
-  };
-
-  const handleDateClick = (dateStr: string | null) => {
-    if (!dateStr) return;
-    
-    if (!formData.startDate || (formData.startDate && formData.endDate)) {
-      // Start new selection
-      setFormData({ ...formData, startDate: dateStr, endDate: '' });
-    } else if (formData.startDate && !formData.endDate) {
-      // Complete the range
-      if (new Date(dateStr) < new Date(formData.startDate)) {
-        // If clicked date is before start, swap them
-        setFormData({ ...formData, startDate: dateStr, endDate: formData.startDate });
-      } else {
-        setFormData({ ...formData, endDate: dateStr });
-      }
-    }
-  };
-
-  const isDateInRange = (dateStr: string) => {
-    if (!formData.startDate || !dateStr) return false;
-    const date = new Date(dateStr);
-    const start = new Date(formData.startDate);
-    const end = formData.endDate ? new Date(formData.endDate) : null;
-    
-    if (end) {
-      return date >= start && date <= end;
-    }
-    return dateStr === formData.startDate;
+    return nextMonth.toISOString().split('T')[0];
   };
 
   const formatDateRange = () => {
     if (!formData.startDate) return '';
     if (!formData.endDate) return new Date(formData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    
+
     const start = new Date(formData.startDate);
     const end = new Date(formData.endDate);
-    
+
     return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  };
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const startDate = e.target.value;
+    setFieldValue('startDate', startDate);
+
+    // If end date exists and is before new start date, clear it
+    if (formData.endDate && new Date(formData.endDate) <= new Date(startDate)) {
+      setFieldValue('endDate', '');
+    }
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const endDate = e.target.value;
+    setFieldValue('endDate', endDate);
   };
 
   const experiences = [
@@ -126,15 +79,12 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   ];
 
   const handleExperienceToggle = (experience: string) => {
-    setFormData(prev => {
-      const current = prev.experiences;
-      if (current.includes(experience)) {
-        return { ...prev, experiences: current.filter((e: string) => e !== experience) };
-      } else if (current.length < 3) {
-        return { ...prev, experiences: [...current, experience] };
-      }
-      return prev;
-    });
+    const current = formData.experiences || [];
+    if (current.includes(experience)) {
+      setFieldValue('experiences', current.filter((e: string) => e !== experience));
+    } else if (current.length < 3) {
+      setFieldValue('experiences', [...current, experience]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -142,7 +92,19 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     onNext(formData);
   };
 
-  const isFormValid = formData.travelDate && formData.startDate && formData.endDate && formData.experiences.length === 3;
+  console.log('🎯 DreamTripForm validation:', {
+    travelDate: formData.travelDate,
+    startDate: formData.startDate,
+    endDate: formData.endDate,
+    experiences: formData.experiences?.length,
+    companion: formData.companion,
+    experiencesSelected: formData.experiences?.length === 3,
+    startDateSelected: !!formData.startDate,
+    endDateSelected: !!formData.endDate,
+    travelDateSelected: !!formData.travelDate
+  });
+
+  const isFormValid = formData.travelDate && formData.startDate && formData.endDate && (formData.experiences?.length === 3);
 
   const companionOptions = [
     { value: 'solo', label: 'Solo', subtitle: 'Just me', emoji: '👤' },
@@ -229,7 +191,9 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
               <select
                 value={formData.travelDate}
                 onChange={(e) => {
-                  setFormData({ ...formData, travelDate: e.target.value, startDate: '', endDate: '' });
+                  setFieldValue('travelDate', e.target.value);
+                  setFieldValue('startDate', '');
+                  setFieldValue('endDate', '');
                   setShowCalendar(true);
                 }}
                 className="px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
@@ -386,21 +350,21 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                 >
                   Select Your Top 3 Dream Experiences (Choose exactly 3)
                 </label>
-                <span 
+                <span
                   className="text-green-600 font-semibold"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
+                  style={{
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400
                   }}
                 >
-                  {formData.experiences.length}/3 selected
+                  {(formData.experiences?.length || 0)}/3 selected
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {experiences.map((exp, index) => {
-                  const isSelected = formData.experiences.includes(exp.value);
-                  const canSelect = formData.experiences.length < 3 || isSelected;
+                  const isSelected = (formData.experiences || []).includes(exp.value);
+                  const canSelect = (formData.experiences || []).length < 3 || isSelected;
 
                   return (
                     <motion.button
@@ -505,7 +469,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                   <motion.button
                     key={option.value}
                     type="button"
-                    onClick={() => setFormData({ ...formData, companion: option.value })}
+                    onClick={() => setFieldValue('companion', option.value)}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.6 + index * 0.1 }}
@@ -567,7 +531,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
               <input
                 type="text"
                 value={formData.dreamWords}
-                onChange={(e) => setFormData({ ...formData, dreamWords: e.target.value })}
+                onChange={(e) => setFieldValue('dreamWords', e.target.value)}
                 className="px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 style={{ 
                   width: '270px', 

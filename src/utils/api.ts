@@ -5,7 +5,7 @@ const API_BASE_URL = 'https://lavenderblush-jellyfish-670937.hostingersite.com/a
 const FORM_ENDPOINT = '/form-submissions'; // Try this first, fallback to /form-submissons if needed
 
 export const uploadFile = async (file: File, type: string = 'travel_photo'): Promise<
-  | { success: true; data: { url: string; filename: string } }
+  | { success: true; data: { url: string; filename: string; path: string } }
   | { success: false; error: string }
 > => {
   try {
@@ -34,8 +34,12 @@ export const uploadFile = async (file: File, type: string = 'travel_photo'): Pro
 
     const result = await response.json();
     console.log('✅ File upload successful:', result);
+    console.log('Full API response body:', JSON.stringify(result, null, 2));
 
-    return { success: true, data: result };
+    // Handle API response structure - extract data from wrapper if present
+    const uploadData = result.data || result;
+
+    return { success: true, data: uploadData };
   } catch (error) {
     console.error('❌ File upload error:', error);
     return {

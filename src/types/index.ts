@@ -217,3 +217,215 @@ export function isValidationError(response: any): response is FormValidationErro
 export function isServerError(response: any): response is FormServerErrorResponse {
   return response && typeof response === 'object' && response.error && !response.errors;
 }
+
+// ========== FILE UPLOAD TYPES ========== //
+
+export interface FileUploadSuccessResponse {
+  success: true;
+  data: {
+    url: string;
+    path: string;
+    filename: string;
+    size: number;
+    mime_type: string;
+  };
+}
+
+export interface FileUploadErrorResponse {
+  success: false;
+  message: string;
+  error?: string;
+}
+
+export type FileUploadResponse = FileUploadSuccessResponse | FileUploadErrorResponse;
+
+// ========== ZOD VALIDATION SCHEMAS ========== //
+
+import { z } from 'zod';
+
+// Traveller Vibes Form Schema
+export const travellerVibesSchema = z.object({
+  name: z.string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must be less than 100 characters')
+    .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
+
+  email: z.string()
+    .email('Please enter a valid email address')
+    .max(255, 'Email must be less than 255 characters'),
+
+  phone: z.string()
+    .optional()
+    .refine((val) => !val || /^[\+]?[1-9][\d]{0,15}$/.test(val), {
+      message: 'Please enter a valid phone number'
+    }),
+
+  country: z.string()
+    .min(1, 'Please select your country of residence'),
+
+  beenToAfrica: z.enum(['yes', 'no'], {
+    message: 'Please indicate if you have been to Africa before'
+  }),
+
+  travellerType: z.array(z.string())
+    .min(1, 'Please select at least one traveller type')
+    .max(3, 'Please select no more than 3 traveller types'),
+
+  hearAbout: z.array(z.string())
+    .min(1, 'Please select how you heard about us'),
+
+  pioneeerTraveller: z.enum(['yes', 'maybe'], {
+    message: 'Please indicate your preference for being featured'
+  }),
+
+  photo: z.string()
+    .optional()
+    .refine((val) => !val || val.startsWith('http'), {
+      message: 'Photo URL must be valid'
+    })
+});
+
+// Dream Trip Form Schema
+export const dreamTripSchema = z.object({
+  travelDate: z.string()
+    .min(1, 'Please select a travel month'),
+
+  startDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid start date'),
+
+  endDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid end date'),
+
+  experiences: z.array(z.string())
+    .min(3, 'Please select exactly 3 experiences')
+    .max(3, 'Please select exactly 3 experiences'),
+
+  companion: z.string()
+    .min(1, 'Please select who is traveling with you'),
+
+  dreamWords: z.string()
+    .max(100, 'Dream description must be less than 100 characters')
+    .optional()
+}).refine((data) => {
+  // Validate that end date is after start date
+  const start = new Date(data.startDate);
+  const end = new Date(data.endDate);
+  return end > start;
+}, {
+  message: 'End date must be after start date',
+  path: ['endDate']
+});
+
+// Explorer Circle Form Schema
+export const explorerCircleSchema = z.object({
+  keepUpdated: z.boolean()
+});
+
+// Complete Form Schema (combination of all steps)
+export const completeFormSchema = travellerVibesSchema
+  .merge(dreamTripSchema)
+  .merge(explorerCircleSchema);
+
+// Type inference from schemas
+export type TravellerVibesFormData = z.infer<typeof travellerVibesSchema>;
+export type DreamTripFormData = z.infer<typeof dreamTripSchema>;
+export type ExplorerCircleFormData = z.infer<typeof explorerCircleSchema>;
+export type CompleteFormData = z.infer<typeof completeFormSchema>;
+
+// ========== VALIDATION HOOKS ========== //
+
+import { useState, useCallback } from 'react';
+
+export interface ValidationResult<T> {
+  data: T | null;
+  errors: Record<string, string>;
+  isValid: boolean;
+}
+
+export function useFormValidation<T>(
+  schema: z.ZodSchema<T>,
+  initialData: Partial<T> = {}
+) {
+  const [data, setData] = useState<Partial<T>>(initialData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const validate = useCallback((formData: Partial<T> = data): ValidationResult<T> => {
+    try {
+      const validData = schema.parse(formData);
+      setErrors({});
+      return { data: validData, errors: {}, isValid: true };
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        error.issues.forEach((issue) => {
+          const path = issue.path.join('.');
+          fieldErrors[path] = issue.message;
+        });
+        setErrors(fieldErrors);
+        return { data: null, errors: fieldErrors, isValid: false };
+      }
+      return { data: null, errors: { general: 'Validation failed' }, isValid: false };
+    }
+  }, [schema, data]);
+
+  const validateField = useCallback((field: keyof T, value: any) => {
+    try {
+      // Create a partial schema for just this field
+      const fieldSchema = (schema as any).shape?.[field];
+      if (fieldSchema) {
+        fieldSchema.parse(value);
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[field as string];
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldError = error.issues[0]?.message || 'Invalid value';
+        setErrors(prev => ({ ...prev, [field as string]: fieldError }));
+      }
+    }
+  }, [schema]);
+
+  const setFieldValue = useCallback((field: keyof T, value: any) => {
+    setData(prev => ({ ...prev, [field]: value }));
+    setTouched(prev => ({ ...prev, [field as string]: true }));
+    validateField(field, value);
+  }, [validateField]);
+
+  const setFieldTouched = useCallback((field: keyof T) => {
+    setTouched(prev => ({ ...prev, [field as string]: true }));
+  }, []);
+
+  const reset = useCallback(() => {
+    setData(initialData);
+    setErrors({});
+    setTouched({});
+  }, [initialData]);
+
+  const getFieldError = useCallback((field: keyof T): string | undefined => {
+    const fieldName = field as string;
+    return touched[fieldName] ? errors[fieldName] : undefined;
+  }, [errors, touched]);
+
+  const hasFieldError = useCallback((field: keyof T): boolean => {
+    const fieldName = field as string;
+    return touched[fieldName] && !!errors[fieldName];
+  }, [errors, touched]);
+
+  return {
+    data,
+    errors,
+    touched,
+    validate,
+    validateField,
+    setFieldValue,
+    setFieldTouched,
+    reset,
+    getFieldError,
+    hasFieldError,
+    isValid: Object.keys(errors).length === 0
+  };
+}

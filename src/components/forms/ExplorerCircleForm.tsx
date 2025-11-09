@@ -37,24 +37,25 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
       const completeFormData = {
         name: initialData.name || "",
         email: initialData.email || "",
-        country_of_residence: initialData.country_of_residence || "",
-        been_to_africa_before: initialData.been_to_africa_before || false,
-        travel_style: initialData.travel_style || [],
-        dream_escape_words: initialData.dream_escape_words || "",
-        heard_about_us: initialData.heard_about_us || "",
-        feature_as_pioneer: initialData.feature_as_pioneer || "",
-        travel_photo_url: initialData.travel_photo_url || "",
-        travel_month: initialData.travel_month || null,
-        travel_year: initialData.travel_year || null,
-        preferred_start_date: initialData.preferred_start_date || "",
-        preferred_end_date: initialData.preferred_end_date || "",
-        group_type: initialData.group_type || "",
-        group_size: initialData.group_size || null,
-        must_have_experiences: initialData.must_have_experiences || [],
-        accessibility_dietary_preferences: initialData.accessibility_dietary_preferences || "",
-        send_options: initialData.send_options || "",
-        join_early_explorer: true, // This seems to be always true for Explorer Circle
-        email_opt_in: keepUpdated // Map the checkbox to email_opt_in
+        phone: initialData.phone || "",
+        country_of_residence: initialData.country || "",
+        been_to_africa_before: initialData.beenToAfrica === 'yes',
+        travel_style: initialData.travellerType || [],
+        dream_escape_words: initialData.dreamWords || "",
+        heard_about_us: initialData.hearAbout ? initialData.hearAbout[0] : "",
+        feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
+        travel_photo_url: initialData.photo || "",
+        travel_month: initialData.travelMonth || null,
+        travel_year: initialData.travelYear || null,
+        preferred_start_date: initialData.startDate || "",
+        preferred_end_date: initialData.endDate || "",
+        group_type: initialData.companion || "",
+        group_size: initialData.groupSize || null,
+        must_have_experiences: initialData.experiences || [],
+        accessibility_dietary_preferences: initialData.preferences || "",
+        send_options: "both",
+        join_early_explorer: true,
+        email_opt_in: keepUpdated
       };
 
       console.log('📋 Complete form data being submitted:', completeFormData);

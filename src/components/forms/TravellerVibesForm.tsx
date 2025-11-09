@@ -1,6 +1,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { uploadFile } from "../../utils/api";
+import { useFormValidation, travellerVibesSchema } from "../../types";
 
 interface TravellerVibesFormProps {
   onNext: (data: any) => void;
@@ -10,14 +11,21 @@ interface TravellerVibesFormProps {
   onClose?: () => void;
 }
 
-export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({ 
-  onNext, 
-  initialData, 
-  currentStep = 1, 
-  totalSteps = 3, 
-  onClose 
+export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
+  onNext,
+  initialData,
+  currentStep = 1,
+  totalSteps = 3,
+  onClose
 }) => {
-  const [formData, setFormData] = React.useState({
+  // Initialize form validation with Zod
+  const {
+    data: formData,
+    setFieldValue,
+    setFieldTouched,
+    getFieldError,
+    hasFieldError
+  } = useFormValidation(travellerVibesSchema, {
     name: initialData.name || '',
     email: initialData.email || '',
     phone: initialData.phone || '',
@@ -56,21 +64,19 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
   ];
 
   const handleTravellerTypeToggle = (type: string) => {
-    setFormData(prev => ({
-      ...prev,
-      travellerType: prev.travellerType.includes(type)
-        ? prev.travellerType.filter((t: string) => t !== type)
-        : [...prev.travellerType, type]
-    }));
+    const currentTypes = formData.travellerType || [];
+    const newTypes = currentTypes.includes(type)
+      ? currentTypes.filter((t: string) => t !== type)
+      : [...currentTypes, type];
+    setFieldValue('travellerType', newTypes);
   };
 
   const handleHearAboutToggle = (option: string) => {
-    setFormData(prev => ({
-      ...prev,
-      hearAbout: prev.hearAbout.includes(option)
-        ? prev.hearAbout.filter((h: string) => h !== option)
-        : [...prev.hearAbout, option]
-    }));
+    const currentOptions = formData.hearAbout || [];
+    const newOptions = currentOptions.includes(option)
+      ? currentOptions.filter((h: string) => h !== option)
+      : [...currentOptions, option];
+    setFieldValue('hearAbout', newOptions);
   };
 
   const handleFileUpload = async (file: File) => {
@@ -80,14 +86,22 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
       const result = await uploadFile(file, 'travel_photo');
 
       if (result.success) {
+        console.log('🚀 Upload result from API:', result);
+        console.log('🚀 result.data:', result.data);
+        const uploadedUrl = result.data?.url;
+
+        if (!uploadedUrl) {
+          console.error('❌ No URL found in upload response:', result.data);
+        }
+
         setUploadState({
           isUploading: false,
           error: null,
-          uploadedUrl: result.data.url
+          uploadedUrl: uploadedUrl || null
         });
         // Store the uploaded URL in form data
-        setFormData(prev => ({ ...prev, photo: result.data.url }));
-        console.log('✅ Photo uploaded successfully:', result.data.url);
+        setFieldValue('photo', uploadedUrl || null);
+        console.log('✅ Photo uploaded successfully:', uploadedUrl);
       } else {
         setUploadState({
           isUploading: false,
@@ -119,7 +133,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
     onNext(formData);
   };
 
-  const isFormValid = formData.name && formData.email && formData.country && formData.beenToAfrica && formData.travellerType.length > 0;
+  const isFormValid = formData.name && formData.email && formData.country && formData.beenToAfrica && (formData.travellerType?.length || 0) > 0;
 
   return (
     <div className="grid md:grid-cols-3 gap-6 px-4 md:px-0">
@@ -199,9 +213,12 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  value={formData.name || ''}
+                  onChange={(e) => setFieldValue('name', e.target.value)}
+                  onBlur={() => setFieldTouched('name')}
+                  className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
+                    hasFieldError('name') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                   style={{
                     height: '40px',
                     fontSize: '14px',
@@ -212,6 +229,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   placeholder="Enter your name"
                   required
                 />
+                {getFieldError('name') && (
+                  <p className="text-red-600 text-sm mt-1">{getFieldError('name')}</p>
+                )}
               </motion.div>
 
               <motion.div
@@ -231,9 +251,12 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 </label>
                 <input
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  value={formData.email || ''}
+                  onChange={(e) => setFieldValue('email', e.target.value)}
+                  onBlur={() => setFieldTouched('email')}
+                  className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
+                    hasFieldError('email') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                   style={{
                     height: '40px',
                     fontSize: '14px',
@@ -244,6 +267,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   placeholder="your.email@example.com"
                   required
                 />
+                {getFieldError('email') && (
+                  <p className="text-red-600 text-sm mt-1">{getFieldError('email')}</p>
+                )}
               </motion.div>
             </div>
 
@@ -265,9 +291,12 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
               </label>
               <input
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                value={formData.phone || ''}
+                onChange={(e) => setFieldValue('phone', e.target.value)}
+                onBlur={() => setFieldTouched('phone')}
+                className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
+                  hasFieldError('phone') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
                 style={{
                   height: '40px',
                   fontSize: '14px',
@@ -277,6 +306,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 }}
                 placeholder="+1 (555) 123-4567"
               />
+              {getFieldError('phone') && (
+                <p className="text-red-600 text-sm mt-1">{getFieldError('phone')}</p>
+              )}
             </motion.div>
 
             {/* Country and Africa Experience Row */}
@@ -297,13 +329,16 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   Country of Residence
                 </label>
                 <select
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  style={{ 
+                  value={formData.country || ''}
+                  onChange={(e) => setFieldValue('country', e.target.value)}
+                  onBlur={() => setFieldTouched('country')}
+                  className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
+                    hasFieldError('country') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
+                  style={{
                     height: '40px',
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
                     fontWeight: 400,
                     maxWidth: '270px'
                   }}
@@ -342,7 +377,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       name="beenToAfrica"
                       value="yes"
                       checked={formData.beenToAfrica === 'yes'}
-                      onChange={(e) => setFormData({ ...formData, beenToAfrica: e.target.value })}
+                      onChange={(e) => setFieldValue('beenToAfrica', e.target.value)}
                       className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                     />
                     <span 
@@ -361,7 +396,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       name="beenToAfrica"
                       value="no"
                       checked={formData.beenToAfrica === 'no'}
-                      onChange={(e) => setFormData({ ...formData, beenToAfrica: e.target.value })}
+                      onChange={(e) => setFieldValue('beenToAfrica', e.target.value)}
                       className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                     />
                     <span 
@@ -404,7 +439,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.7 + index * 0.1 }}
                     className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left w-full ${
-                      formData.travellerType.includes(type.value)
+                      (formData.travellerType || []).includes(type.value)
                         ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                     }`}
@@ -423,20 +458,20 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     >
                       {type.label}
                     </span>
-                    {formData.travellerType.includes(type.value) && (
+                    {(formData.travellerType || []).includes(type.value) && (
                       <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                        <svg 
-                          width="14" 
-                          height="14" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
                           xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path 
-                            d="M20 6L9 17L4 12" 
-                            stroke="white" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
+                          <path
+                            d="M20 6L9 17L4 12"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                         </svg>
@@ -473,7 +508,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.9 + index * 0.1 }}
                     className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left w-full ${
-                      formData.hearAbout.includes(option.value)
+                      (formData.hearAbout || []).includes(option.value)
                         ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                     }`}
@@ -492,20 +527,20 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     >
                       {option.label}
                     </span>
-                    {formData.hearAbout.includes(option.value) && (
+                    {(formData.hearAbout || []).includes(option.value) && (
                       <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                        <svg 
-                          width="14" 
-                          height="14" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
                           xmlns="http://www.w3.org/2000/svg"
                         >
-                          <path 
-                            d="M20 6L9 17L4 12" 
-                            stroke="white" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
+                          <path
+                            d="M20 6L9 17L4 12"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                         </svg>
@@ -535,7 +570,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, pioneeerTraveller: 'yes' })}
+                  onClick={() => setFieldValue('pioneeerTraveller', 'yes')}
                   className={`flex items-center justify-center gap-3 p-3 rounded-lg border-2 transition-all text-center flex-1 min-h-[48px] ${
                     formData.pioneeerTraveller === 'yes'
                       ? 'border-green-500 bg-green-50 text-green-700'
@@ -556,7 +591,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, pioneeerTraveller: 'maybe' })}
+                  onClick={() => setFieldValue('pioneeerTraveller', 'maybe')}
                   className={`flex items-center justify-center gap-3 p-3 rounded-lg border-2 transition-all text-center flex-1 min-h-[48px] ${
                     formData.pioneeerTraveller === 'maybe'
                       ? 'border-green-500 bg-green-50 text-green-700'
@@ -594,6 +629,41 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
               >
                 Upload a photo
               </label>
+
+              {/* Image Preview */}
+              {uploadState.uploadedUrl && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-4"
+                >
+                  <div className="relative inline-block">
+                    <img
+                      src={uploadState.uploadedUrl}
+                      alt="Uploaded travel photo"
+                      className="w-32 h-32 object-cover rounded-lg border-2 border-green-400 shadow-md"
+                    />
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5 13l4 4L19 7"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 uploadState.uploadedUrl
                   ? 'border-green-400 bg-green-50'
