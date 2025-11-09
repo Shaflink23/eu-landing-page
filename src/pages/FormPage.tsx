@@ -16,7 +16,8 @@ export const FormPage = () => {
   const totalSteps = 3;
 
   const handleNext = (stepData: any) => {
-    setFormData({ ...formData, ...stepData });
+    const newFormData = { ...formData, ...stepData };
+    setFormData(newFormData);
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
       // Scroll to top when moving to next step

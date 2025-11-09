@@ -133,7 +133,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
     onNext(formData);
   };
 
-  const isFormValid = formData.name && formData.email && formData.country && formData.beenToAfrica && (formData.travellerType?.length || 0) > 0;
+  const isFormValid = formData.name && formData.email && formData.country && formData.country !== '' && formData.beenToAfrica && (formData.travellerType?.length || 0) > 0;
 
   return (
     <div className="grid md:grid-cols-3 gap-6 px-4 md:px-0">
@@ -345,13 +345,13 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   required
                 >
                   <option value="">Select your country</option>
-                  <option value="UK">United Kingdom</option>
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="AU">Australia</option>
-                  <option value="DE">Germany</option>
-                  <option value="FR">France</option>
-                  <option value="other">Other</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Germany">Germany</option>
+                  <option value="France">France</option>
+                  <option value="Other">Other</option>
                 </select>
               </motion.div>
 

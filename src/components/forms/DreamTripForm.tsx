@@ -22,10 +22,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   // Initialize form validation with Zod
   const {
     data: formData,
-    setFieldValue,
-    setFieldTouched,
-    getFieldError,
-    hasFieldError
+    setFieldValue
   } = useFormValidation(dreamTripSchema, {
     startDate: initialData.startDate || '',
     endDate: initialData.endDate || '',
@@ -92,15 +89,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     onNext(formData);
   };
 
-  console.log('🎯 DreamTripForm validation:', {
-    startDate: formData.startDate,
-    endDate: formData.endDate,
-    experiences: formData.experiences?.length,
-    companion: formData.companion,
-    experiencesSelected: formData.experiences?.length === 3,
-    startDateSelected: !!formData.startDate,
-    endDateSelected: !!formData.endDate
-  });
+  // Validation check
 
   const isFormValid = formData.startDate && formData.endDate && (formData.experiences?.length === 3);
 

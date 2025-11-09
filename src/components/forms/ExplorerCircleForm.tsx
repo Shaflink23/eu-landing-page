@@ -59,9 +59,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         email_opt_in: keepUpdated // Use the checkbox state
       };
 
-      console.log('📋 Complete form data being submitted:', completeFormData);
-      console.log('📋 Initial data:', initialData);
-      console.log('📋 Keep updated (email_opt_in):', keepUpdated);
+      // Submit to backend API
 
       // Submit to backend API
       const result = await submitFormData(completeFormData);

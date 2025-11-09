@@ -54,65 +54,43 @@ export const submitFormData = async (formData: any): Promise<
   | { success: false; error: string }
 > => {
   try {
-    console.log('📋 Raw form data received:', formData);
+    // Validate the payload against our expected schema before sending
+    const payload: FormSubmissionRequest = formData;
 
-    // Transform form data to match API schema with proper defaults
-    const payload: FormSubmissionRequest = {
-      // From TravellerVibesForm (Step 1)
-      name: formData.name || 'Guest User',
-      email: formData.email || 'guest@example.com',
-      country_of_residence: formData.country || 'Unknown',
-      been_to_africa_before: formData.beenToAfrica === 'yes',
-
-      // Travel style - MUST BE AN ARRAY (backend expects array, max 3 selections)
-      travel_style: Array.isArray(formData.travellerType) && formData.travellerType.length > 0
-        ? formData.travellerType.slice(0, 3).map((type: string) => formatTravelStyle(type) as any)
-        : ['adventurer'],
-
-      // Heard about us from Step 1
-      heard_about_us: formatReferralSource(formData.hearAbout || []) as any,
-
-      // Pioneer traveller from Step 1 - Backend expects specific values
-      feature_as_pioneer: formData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
-
-      // Travel photo from Step 1 - provide valid default URL
-      travel_photo_url: formData.photo || 'https://example.com/travel-photo.jpg',
-
-      // From DreamTripForm (Step 2)
-      dream_escape_words: formData.dreamWords || 'adventure, culture, nature',
-
-      // Travel dates from Step 2 - Add full date strings
-      travel_month: formData.startDate ? extractMonthFromDateRange(formData.startDate) : new Date().getMonth() + 1,
-      travel_year: formData.startDate ? extractYearFromDateRange(formData.startDate) : new Date().getFullYear(),
-      preferred_start_date: formData.startDate || undefined,
-      preferred_end_date: formData.endDate || undefined,
-
-      // Group info from Step 2
-      group_type: (formData.companion?.toLowerCase() || 'solo') as any,
-      group_size: formData.companion ? calculateGroupSize(formData.companion) : 1,
-
-      // Experiences from Step 2 - MUST BE EXACTLY 3 VALID EXPERIENCES
-      must_have_experiences: formatExperiences(formData.experiences || []) as any,
-
-      // Accessibility/dietary preferences
-      accessibility_dietary_preferences: formData.preferences || 'None',
-
-      // Send options
-      send_options: 'both',
-
-      // From ExplorerCircleForm (Step 3)
-      join_early_explorer: formData.keepUpdated === true,
-      email_opt_in: formData.keepUpdated === true,
-    };
+    // Validate required fields and data types
+    if (!payload.name || typeof payload.name !== 'string') {
+      throw new Error('Invalid or missing name field');
+    }
+    if (!payload.email || typeof payload.email !== 'string') {
+      throw new Error('Invalid or missing email field');
+    }
+    if (!payload.country_of_residence || typeof payload.country_of_residence !== 'string') {
+      throw new Error('Invalid or missing country_of_residence field');
+    }
+    if (typeof payload.been_to_africa_before !== 'boolean') {
+      throw new Error('Invalid been_to_africa_before field - must be boolean');
+    }
+    if (!Array.isArray(payload.travel_style)) {
+      throw new Error('Invalid travel_style field - must be array');
+    }
+    if (!Array.isArray(payload.must_have_experiences) || payload.must_have_experiences.length !== 3) {
+      throw new Error('Invalid must_have_experiences field - must be array of exactly 3 strings');
+    }
+    if (typeof payload.join_early_explorer !== 'boolean') {
+      throw new Error('Invalid join_early_explorer field - must be boolean');
+    }
+    if (typeof payload.email_opt_in !== 'boolean') {
+      throw new Error('Invalid email_opt_in field - must be boolean');
+    }
 
     console.log('📤 Submitting form data to API:');
     console.log('  ✓ Name:', payload.name);
     console.log('  ✓ Email:', payload.email);
     console.log('  ✓ Country:', payload.country_of_residence);
     console.log('  ✓ Been to Africa:', payload.been_to_africa_before);
-    console.log('  ✓ Travel Styles (array):', payload.travel_style);
+    console.log('  ✓ Travel Styles:', payload.travel_style);
     console.log('  ✓ Heard About Us:', payload.heard_about_us);
-    console.log('  ✓ Experiences (array):', payload.must_have_experiences);
+    console.log('  ✓ Experiences:', payload.must_have_experiences);
     console.log('  ✓ Travel Date:', `${payload.travel_month}/${payload.travel_year}`);
     console.log('  ✓ Group:', `${payload.group_type} (${payload.group_size} people)`);
     console.log('🔗 API Endpoint:', `${API_BASE_URL}${FORM_ENDPOINT}`);

@@ -261,7 +261,8 @@ export const travellerVibesSchema = z.object({
     }),
 
   country: z.string()
-    .min(1, 'Please select your country of residence'),
+    .min(1, 'Please select your country of residence')
+    .refine((val) => val !== '', 'Please select a valid country'),
 
   beenToAfrica: z.enum(['yes', 'no'], {
     message: 'Please indicate if you have been to Africa before'
