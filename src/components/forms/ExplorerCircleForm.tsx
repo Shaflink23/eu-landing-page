@@ -41,22 +41,22 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         phone: initialData.phone || "",
         country_of_residence: initialData.country || "Unknown",
         been_to_africa_before: initialData.beenToAfrica === 'yes',
-        travel_style: initialData.travellerType ? [initialData.travellerType].flat() : ["adventurer"],
-        dream_escape_words: initialData.dreamWords || "adventure, culture, nature",
-        heard_about_us: initialData.hearAbout && initialData.hearAbout.length > 0 ? initialData.hearAbout[0] : "other",
+        travel_style: Array.isArray(initialData.travellerType) ? initialData.travellerType : (initialData.travellerType ? [initialData.travellerType] : ["adventurer"]),
+        dream_escape_words: initialData.dreamWords || "",
+        heard_about_us: Array.isArray(initialData.hearAbout) && initialData.hearAbout.length > 0 ? initialData.hearAbout[0] : "other",
         feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
-        travel_photo_url: initialData.photo || "https://example.com/travel-photo.jpg",
+        travel_photo_url: initialData.photo || null,
         travel_month: initialData.startDate ? new Date(initialData.startDate).getMonth() + 1 : new Date().getMonth() + 1,
         travel_year: initialData.startDate ? new Date(initialData.startDate).getFullYear() : new Date().getFullYear(),
         preferred_start_date: initialData.startDate || null,
         preferred_end_date: initialData.endDate || null,
         group_type: initialData.companion || "solo",
         group_size: initialData.companion ? (initialData.companion === 'friends' || initialData.companion === 'family' ? 4 : initialData.companion === 'couple' ? 2 : 1) : 1,
-        must_have_experiences: initialData.experiences && initialData.experiences.length > 0 ? initialData.experiences : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
+        must_have_experiences: Array.isArray(initialData.experiences) && initialData.experiences.length > 0 ? initialData.experiences : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
         accessibility_dietary_preferences: initialData.preferences || "None",
         send_options: "both",
-        join_early_explorer: true,
-        email_opt_in: keepUpdated
+        join_early_explorer: true, // Always true for Explorer Circle
+        email_opt_in: keepUpdated // Use the checkbox state
       };
 
       console.log('📋 Complete form data being submitted:', completeFormData);
@@ -70,6 +70,8 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
 
       if (result.success) {
         console.log('🎉 Submission successful!', result.data);
+        // Store the API response data for display
+        setSubmissionData(result.data);
         setIsSubmitted(true);
       } else {
         console.error('❌ Submission failed:', result.error);
@@ -109,14 +111,44 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-semibold text-green-700 mb-3">Thank you for joining the Explorer Circle!</h2>
-          <p className="text-base text-gray-700 mb-4">We'll be in touch soon with your personalized journey options and a free digital guide.</p>
-          <button
-            onClick={onClose}
-            className="mt-3 px-6 py-3 rounded bg-green-500 text-white text-base font-medium shadow hover:scale-105 transition-all"
-          >
-            Close
-          </button>
+          <h2 className="text-2xl font-semibold text-green-700 mb-3">🎉 Your Uganda Adventure Awaits!</h2>
+
+          {submissionData && (
+            <div className="text-center mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-green-800 font-medium mb-2">
+                  Reference: {submissionData.reference_number}
+                </p>
+                <p className="text-xs text-green-600">
+                  Estimated response time: {submissionData.estimated_response_time}
+                </p>
+              </div>
+
+              <div className="text-left space-y-2">
+                <h3 className="font-semibold text-gray-800 mb-3">What's Next:</h3>
+                {submissionData.next_steps && submissionData.next_steps.map((step: string, index: number) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-white text-xs font-bold">{index + 1}</span>
+                    </div>
+                    <p className="text-sm text-gray-700">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="text-center">
+            <p className="text-base text-gray-700 mb-4">
+              {submissionData?.message || "We'll be in touch soon with your personalized journey options and a free digital guide."}
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-3 px-6 py-3 rounded bg-green-500 text-white text-base font-medium shadow hover:scale-105 transition-all"
+            >
+              Close
+            </button>
+          </div>
         </motion.div>
       </>
     );
