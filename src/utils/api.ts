@@ -57,30 +57,42 @@ export const submitFormData = async (formData: any): Promise<
     // Validate the payload against our expected schema before sending
     const payload: FormSubmissionRequest = formData;
 
-    // Validate required fields and data types
+    // Validate payload matches backend schema requirements
     if (!payload.name || typeof payload.name !== 'string') {
-      throw new Error('Invalid or missing name field');
+      throw new Error('Missing or invalid name field');
     }
     if (!payload.email || typeof payload.email !== 'string') {
-      throw new Error('Invalid or missing email field');
+      throw new Error('Missing or invalid email field');
     }
     if (!payload.country_of_residence || typeof payload.country_of_residence !== 'string') {
-      throw new Error('Invalid or missing country_of_residence field');
+      throw new Error('Missing or invalid country_of_residence field');
     }
     if (typeof payload.been_to_africa_before !== 'boolean') {
-      throw new Error('Invalid been_to_africa_before field - must be boolean');
+      throw new Error('been_to_africa_before must be boolean');
     }
-    if (!Array.isArray(payload.travel_style)) {
-      throw new Error('Invalid travel_style field - must be array');
+    if (!Array.isArray(payload.travel_style) || payload.travel_style.length === 0 || payload.travel_style.length > 3) {
+      throw new Error('travel_style must be array of 1-3 valid travel style values');
     }
     if (!Array.isArray(payload.must_have_experiences) || payload.must_have_experiences.length !== 3) {
-      throw new Error('Invalid must_have_experiences field - must be array of exactly 3 strings');
+      throw new Error('must_have_experiences must be array of exactly 3 valid experience codes');
+    }
+    if (payload.travel_year && (typeof payload.travel_year !== 'number' || payload.travel_year < new Date().getFullYear())) {
+      throw new Error('travel_year must be current year or later');
+    }
+    if (payload.group_type && !['solo', 'couple', 'group'].includes(payload.group_type)) {
+      throw new Error('group_type must be one of: solo, couple, group');
+    }
+    if (payload.group_size && typeof payload.group_size !== 'number') {
+      throw new Error('group_size must be number');
     }
     if (typeof payload.join_early_explorer !== 'boolean') {
-      throw new Error('Invalid join_early_explorer field - must be boolean');
+      throw new Error('join_early_explorer must be boolean');
     }
     if (typeof payload.email_opt_in !== 'boolean') {
-      throw new Error('Invalid email_opt_in field - must be boolean');
+      throw new Error('email_opt_in must be boolean');
+    }
+    if (payload.send_options && !['bespoke_packages', 'sneak_peek', 'both'].includes(payload.send_options)) {
+      throw new Error('send_options must be one of: bespoke_packages, sneak_peek, both');
     }
 
     console.log('📤 Submitting form data to API:');
@@ -184,17 +196,8 @@ export const submitFormData = async (formData: any): Promise<
   }
 };
 
-// Helper function to format travel style - must match backend enum exactly
-function formatTravelStyle(travellerType: string): string {
-  const mapping: { [key: string]: string } = {
-    'adventurer': 'adventurer',
-    'cultural': 'cultural_immerser',
-    'luxe': 'luxury_seeker',
-    'offgrid': 'nature_lover',
-    'mix': 'budget_explorer',
-  };
-  return mapping[travellerType?.toLowerCase()] || 'adventurer';
-}
+// Travel styles must match backend enum exactly - no transformation needed
+// Values are already correct: adventurer, cultural_immerser, luxe_relaxer, off_the_grid, mix_of_all
 
 // Helper function to format referral source
 function formatReferralSource(sources: string[]): "tiktok" | "instagram" | "word_of_mouth" | "uk_travel_group" | "event_expo" | "other" {

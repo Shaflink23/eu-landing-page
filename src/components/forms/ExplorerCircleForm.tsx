@@ -41,7 +41,9 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         phone: initialData.phone || "",
         country_of_residence: initialData.country || "Unknown",
         been_to_africa_before: initialData.beenToAfrica === 'yes',
-        travel_style: Array.isArray(initialData.travellerType) ? initialData.travellerType : (initialData.travellerType ? [initialData.travellerType] : ["adventurer"]),
+        travel_style: Array.isArray(initialData.travellerType) && initialData.travellerType.length > 0
+          ? initialData.travellerType.slice(0, 3) // Ensure max 3 items
+          : ["adventurer"],
         dream_escape_words: initialData.dreamWords || "",
         heard_about_us: Array.isArray(initialData.hearAbout) && initialData.hearAbout.length > 0 ? initialData.hearAbout[0] : "other",
         feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
@@ -52,7 +54,9 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         preferred_end_date: initialData.endDate || null,
         group_type: initialData.companion || "solo",
         group_size: initialData.companion ? (initialData.companion === 'friends' || initialData.companion === 'family' ? 4 : initialData.companion === 'couple' ? 2 : 1) : 1,
-        must_have_experiences: Array.isArray(initialData.experiences) && initialData.experiences.length > 0 ? initialData.experiences : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
+        must_have_experiences: Array.isArray(initialData.experiences) && initialData.experiences.length >= 3
+          ? initialData.experiences.slice(0, 3) // Take first 3, ensure exactly 3
+          : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
         accessibility_dietary_preferences: initialData.preferences || "None",
         send_options: "both",
         join_early_explorer: true, // Always true for Explorer Circle

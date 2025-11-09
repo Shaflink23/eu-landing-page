@@ -49,10 +49,10 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
 
   const travellerTypes = [
     { value: 'adventurer', label: 'Adventurer', emoji: '🏔️' },
-    { value: 'cultural', label: 'Cultural Immerser', emoji: '🎭' },
-    { value: 'luxe', label: 'Luxe Relaxer', emoji: '✨' },
-    { value: 'offgrid', label: 'Off-the-Grid Explorer', emoji: '🌍' },
-    { value: 'mix', label: 'A Mix of All', emoji: '🎨' },
+    { value: 'cultural_immerser', label: 'Cultural Immerser', emoji: '🎭' },
+    { value: 'luxe_relaxer', label: 'Luxe Relaxer', emoji: '✨' },
+    { value: 'off_the_grid', label: 'Off-the-Grid Explorer', emoji: '🌍' },
+    { value: 'mix_of_all', label: 'A Mix of All', emoji: '🎨' },
   ];
 
   const hearAboutOptions = [
