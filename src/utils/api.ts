@@ -1,6 +1,7 @@
+import axios, { AxiosResponse } from 'axios';
 import { FormSubmissionRequest, UgandaFormSuccessResponse, RegularFormSuccessResponse } from '../types';
 
-const API_BASE_URL = 'https://lavenderblush-jellyfish-670937.hostingersite.com/api';
+const API_BASE_URL = 'http://api.everythinguganda.co.uk/api';
 // Note: Backend URL endpoint might be 'form-submissons' (with typo) or 'form-submissions'
 const FORM_ENDPOINT = '/form-submissions'; // Try this first, fallback to /form-submissons if needed
 
@@ -15,36 +16,28 @@ export const uploadFile = async (file: File, type: string = 'travel_photo'): Pro
 
     console.log('📤 Uploading file:', file.name, 'Type:', type);
 
-    const response = await fetch(`${API_BASE_URL}/upload-file`, {
-      method: 'POST',
-      body: formData,
+    const response = await axios.post(`${API_BASE_URL}/upload-file`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: response.statusText };
-      }
-
-      console.error('❌ File upload error:', errorData);
-      throw new Error(errorData.message || 'Failed to upload file');
-    }
-
-    const result = await response.json();
-    console.log('✅ File upload successful:', result);
-    console.log('Full API response body:', JSON.stringify(result, null, 2));
+    console.log('✅ File upload successful:', response.data);
+    console.log('Full API response body:', JSON.stringify(response.data, null, 2));
 
     // Handle API response structure - extract data from wrapper if present
-    const uploadData = result.data || result;
+    const uploadData = response.data.data || response.data;
 
     return { success: true, data: uploadData };
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ File upload error:', error);
+    const errorMessage = error.response?.data?.message ||
+                        error.response?.data?.error ||
+                        error.message ||
+                        'Failed to upload file';
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload file'
+      error: errorMessage
     };
   }
 };
@@ -108,53 +101,56 @@ export const submitFormData = async (formData: any): Promise<
     console.log('🔗 API Endpoint:', `${API_BASE_URL}${FORM_ENDPOINT}`);
 
     // Make the API call - Try both possible endpoints (with and without typo)
-    let response;
+    let response: AxiosResponse;
     try {
-      response = await fetch(`${API_BASE_URL}${FORM_ENDPOINT}`, {
-        method: 'POST',
+      response = await axios.post(`${API_BASE_URL}${FORM_ENDPOINT}`, payload, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(payload),
       });
-      
+    } catch (firstError: any) {
       // If first attempt fails with 404, try the alternate spelling
-      if (response.status === 404) {
+      if (firstError.response?.status === 404) {
         console.log('⚠️ Trying alternate endpoint spelling...');
-        response = await fetch(`${API_BASE_URL}/form-submissons`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
+        try {
+          response = await axios.post(`${API_BASE_URL}/form-submissons`, payload, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          });
+        } catch (secondError: any) {
+          console.error('❌ Network error on second attempt:', secondError);
+          throw new Error('Network error. Please check your connection and try again.');
+        }
+      } else {
+        console.error('❌ Network error on first attempt:', firstError);
+        throw new Error('Network error. Please check your connection and try again.');
       }
-    } catch (fetchError) {
-      console.error('❌ Network error:', fetchError);
-      throw new Error('Network error. Please check your connection and try again.');
     }
 
-    // Handle response
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: response.statusText };
-      }
-      
+    // Handle response - Axios throws for non-2xx status codes
+    console.log('✅ Form submission successful:', response.data);
+
+    return { success: true, data: response.data };
+    
+  } catch (error: any) {
+    console.error('❌ Form submission error:', error);
+
+    // Handle Axios errors
+    if (error.response) {
+      // Server responded with error status
+      const errorData = error.response.data;
       console.error('❌ API Error Response:', errorData);
-      console.error('❌ Response Status:', response.status);
-      console.error('❌ Response Headers:', Object.fromEntries(response.headers.entries()));
-      
+      console.error('❌ Response Status:', error.response.status);
+
       // Extract error message from various possible formats (Laravel validation)
       let errorMessage = 'Failed to submit form';
-      
+
       if (errorData.message) {
         errorMessage = errorData.message;
-        
+
         // If there are validation errors, format them nicely
         if (errorData.errors && typeof errorData.errors === 'object') {
           const errorsList = Object.entries(errorData.errors)
@@ -177,22 +173,25 @@ export const submitFormData = async (formData: any): Promise<
       } else if (errorData.error) {
         errorMessage = errorData.error;
       }
-      
-      console.error('❌ Formatted error message:', errorMessage);
-      throw new Error(errorMessage);
-    }
 
-    const result = await response.json();
-    console.log('✅ Form submission successful:', result);
-    
-    return { success: true, data: result };
-    
-  } catch (error) {
-    console.error('❌ Form submission error:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to submit form. Please try again.'
-    };
+      console.error('❌ Formatted error message:', errorMessage);
+      return {
+        success: false,
+        error: errorMessage
+      };
+    } else if (error.request) {
+      // Network error
+      return {
+        success: false,
+        error: 'Network error. Please check your connection and try again.'
+      };
+    } else {
+      // Other error
+      return {
+        success: false,
+        error: error.message || 'Failed to submit form. Please try again.'
+      };
+    }
   }
 };
 
