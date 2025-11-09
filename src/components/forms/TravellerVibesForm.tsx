@@ -1,5 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
+import { uploadFile } from "../../utils/api";
 
 interface TravellerVibesFormProps {
   onNext: (data: any) => void;
@@ -26,6 +27,16 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
     hearAbout: initialData.hearAbout || [],
     pioneeerTraveller: initialData.pioneeerTraveller || '',
     photo: initialData.photo || null,
+  });
+
+  const [uploadState, setUploadState] = React.useState<{
+    isUploading: boolean;
+    error: string | null;
+    uploadedUrl: string | null;
+  }>({
+    isUploading: false,
+    error: null,
+    uploadedUrl: null,
   });
 
   const travellerTypes = [
@@ -60,6 +71,47 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
         ? prev.hearAbout.filter((h: string) => h !== option)
         : [...prev.hearAbout, option]
     }));
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploadState({ isUploading: true, error: null, uploadedUrl: null });
+
+    try {
+      const result = await uploadFile(file, 'travel_photo');
+
+      if (result.success) {
+        setUploadState({
+          isUploading: false,
+          error: null,
+          uploadedUrl: result.data.url
+        });
+        // Store the uploaded URL in form data
+        setFormData(prev => ({ ...prev, photo: result.data.url }));
+        console.log('✅ Photo uploaded successfully:', result.data.url);
+      } else {
+        setUploadState({
+          isUploading: false,
+          error: result.error,
+          uploadedUrl: null
+        });
+        console.error('❌ Photo upload failed:', result.error);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      setUploadState({
+        isUploading: false,
+        error: errorMessage,
+        uploadedUrl: null
+      });
+      console.error('💥 Photo upload error:', error);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -532,98 +584,155 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.1 }}
             >
-              <label 
+              <label
                 className="block text-gray-700 mb-2"
-                style={{ 
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
+                style={{
+                  fontSize: '14px',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 400
                 }}
               >
                 Upload a photo
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-400 transition-colors">
+              <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                uploadState.uploadedUrl
+                  ? 'border-green-400 bg-green-50'
+                  : uploadState.error
+                  ? 'border-red-400 bg-red-50'
+                  : 'border-gray-300 hover:border-green-400'
+              }`}>
                 <div className="flex flex-col items-center">
-                  {/* Cloud Upload Icon */}
-                  <svg 
-                    width="48" 
-                    height="48" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="mb-4 text-gray-400"
-                  >
-                    <path 
-                      d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                    <path 
-                      d="M14 2V8H20" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                    <path 
-                      d="M12 11V17" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                    <path 
-                      d="M9 14L12 11L15 14" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  
-                  <div className="flex items-center gap-2 mb-2">
-                    <svg 
-                      width="16" 
-                      height="16" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="text-gray-500"
-                    >
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9Z" stroke="currentColor" strokeWidth="2"/>
+                  {/* Upload Status Icon */}
+                  {uploadState.isUploading ? (
+                    <svg className="animate-spin h-12 w-12 text-green-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p 
-                      className="text-gray-600"
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
-                      }}
+                  ) : uploadState.uploadedUrl ? (
+                    <svg
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="mb-4 text-green-600"
                     >
-                      "Show us your travel spirit, it might just end up in our launch reel."
-                    </p>
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="mb-4 text-gray-400"
+                    >
+                      <path
+                        d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M14 2V8H20"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M12 11V17"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M9 14L12 11L15 14"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+
+                  {/* Status Message */}
+                  <div className="mb-4">
+                    {uploadState.isUploading && (
+                      <p className="text-green-700 font-medium">Uploading photo...</p>
+                    )}
+                    {uploadState.uploadedUrl && (
+                      <p className="text-green-700 font-medium">Photo uploaded successfully!</p>
+                    )}
+                    {uploadState.error && (
+                      <p className="text-red-700 font-medium">Upload failed: {uploadState.error}</p>
+                    )}
+                    {!uploadState.isUploading && !uploadState.uploadedUrl && !uploadState.error && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-gray-500"
+                        >
+                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9Z" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                        <p
+                          className="text-gray-600"
+                          style={{
+                            fontSize: '14px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 400
+                          }}
+                        >
+                          "Show us your travel spirit, it might just end up in our launch reel."
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  
+
+                  {/* File Input */}
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setFormData({ ...formData, photo: e.target.files?.[0] || null })}
+                    onChange={handleFileChange}
                     className="hidden"
                     id="photo-upload"
+                    disabled={uploadState.isUploading}
                   />
                   <label
                     htmlFor="photo-upload"
-                    className="cursor-pointer text-green-600 hover:text-green-700"
-                    style={{ 
-                      fontSize: '14px', 
-                      fontFamily: 'Roboto, sans-serif', 
-                      fontWeight: 400 
+                    className={`cursor-pointer ${
+                      uploadState.isUploading
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : uploadState.uploadedUrl
+                        ? 'text-green-700 hover:text-green-800'
+                        : 'text-green-600 hover:text-green-700'
+                    }`}
+                    style={{
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, sans-serif',
+                      fontWeight: 400
                     }}
                   >
-                    Click to upload or drag and drop
+                    {uploadState.isUploading
+                      ? 'Uploading...'
+                      : uploadState.uploadedUrl
+                      ? 'Change photo'
+                      : 'Click to upload or drag and drop'
+                    }
                   </label>
                 </div>
               </div>

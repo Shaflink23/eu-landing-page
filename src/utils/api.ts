@@ -4,6 +4,47 @@ const API_BASE_URL = 'https://lavenderblush-jellyfish-670937.hostingersite.com/a
 // Note: Backend URL endpoint might be 'form-submissons' (with typo) or 'form-submissions'
 const FORM_ENDPOINT = '/form-submissions'; // Try this first, fallback to /form-submissons if needed
 
+export const uploadFile = async (file: File, type: string = 'travel_photo'): Promise<
+  | { success: true; data: { url: string; filename: string } }
+  | { success: false; error: string }
+> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    console.log('📤 Uploading file:', file.name, 'Type:', type);
+
+    const response = await fetch(`${API_BASE_URL}/upload-file`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: response.statusText };
+      }
+
+      console.error('❌ File upload error:', errorData);
+      throw new Error(errorData.message || 'Failed to upload file');
+    }
+
+    const result = await response.json();
+    console.log('✅ File upload successful:', result);
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('❌ File upload error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to upload file'
+    };
+  }
+};
+
 export const submitFormData = async (formData: any): Promise<
   | { success: true; data: UgandaFormSuccessResponse | RegularFormSuccessResponse }
   | { success: false; error: string }
