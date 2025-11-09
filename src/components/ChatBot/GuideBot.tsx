@@ -1,0 +1,342 @@
+import React, { useState, useRef, useEffect } from 'react';
+
+const GuideBot = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
+  const inputRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  const phoneNumber = '256755225525';
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const getCurrentTime = () => {
+    return new Date().toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
+  };
+
+  const addMessage = (content, isBot = false, isTyping = false) => {
+    const newMessage = {
+      id: Date.now(),
+      content,
+      isBot,
+      isTyping,
+      time: getCurrentTime()
+    };
+    setMessages(prev => [...prev, newMessage]);
+  };
+
+  const simulateTyping = (callback, delay = 2000) => {
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      callback();
+    }, delay);
+  };
+
+
+  const getBotResponse = (userMessage) => {
+    const msg = userMessage.toLowerCase();
+    
+    // Greeting responses
+    if (msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
+      return {
+        response: "Hello and welcome to Everything Uganda Adventures!\n\nI'm your virtual tour consultant, here to help you discover our amazing safari packages and answer your questions about Uganda's incredible wildlife experiences.\n\nHow may I assist you today?",
+        showSuggestions: true
+      };
+    }
+
+    // Tour listing
+
+    // Price inquiries
+
+    // Gorilla trekking
+
+    // Duration-based queries
+
+    // Wildlife tours
+
+    // Specific tour inquiries
+
+    // Queen Elizabeth Park
+
+    // Booking inquiries
+    if (msg.includes('book') || msg.includes('reserve') || msg.includes('interested')) {
+      return {
+        response: "BOOKING INFORMATION\n\nI'd be delighted to help you book your Uganda safari adventure!\n\nTo provide you with personalized service and handle your booking properly, our experienced tour consultants will assist you directly.\n\nThey can help with:\n• Custom itinerary planning\n• Group size accommodations\n• Special dietary requirements\n• Travel date flexibility\n• Payment options\n• Travel insurance advice\n\nClick 'Continue on WhatsApp' below to connect with our booking team for immediate assistance.",
+        showSuggestions: false,
+        showWhatsAppButton: true
+      };
+    }
+
+    // Contact info
+    if (msg.includes('contact') || msg.includes('phone') || msg.includes('call')) {
+      return {
+        response: "CONTACT INFORMATION\n\nPhone: +256 (760) 974544\n\nOur team is available to assist you with:\n• Tour bookings and reservations\n• Custom safari planning\n• Travel advice and recommendations\n• Payment and booking modifications\n\nYou can continue chatting here for general information, or click 'Continue on WhatsApp' for direct booking assistance.",
+        showSuggestions: true
+      };
+    }
+
+    // Default response
+    return {
+      response: "EVERYTHING UGANDA ADVENTURES\n\nWelcome to Uganda's premier safari experience!\n\nI can provide information about:\n\nTOUR PACKAGES\n• Gorilla trekking expeditions\n• Wildlife safari adventures\n• Flying safari experiences\n• Multi-day tour combinations\n\nSERVICES\n• Custom itinerary planning\n• Accommodation arrangements\n• Transport and logistics\n• Professional guide services\n\nWhat specific information would you like to know about our safari packages?",
+      showSuggestions: true
+    };
+  };
+
+  const handleQuickReply = (reply) => {
+    setShowQuickReplies(false);
+    addMessage(reply, false);
+    
+    simulateTyping(() => {
+      const { response, showSuggestions, showWhatsAppButton } = getBotResponse(reply);
+      addMessage(response, true);
+      if (showSuggestions) {
+        setTimeout(() => setShowQuickReplies(true), 500);
+      }
+    }, 1500);
+  };
+
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      setShowQuickReplies(false);
+      addMessage(message, false);
+      const userMsg = message;
+      setMessage('');
+      
+      simulateTyping(() => {
+        const { response, showSuggestions, showWhatsAppButton } = getBotResponse(userMsg);
+        addMessage(response, true);
+        if (showSuggestions) {
+          setTimeout(() => setShowQuickReplies(true), 500);
+        }
+      }, 1500);
+    }
+  };
+
+  const handleWhatsAppRedirect = () => {
+    const encodedMessage = encodeURIComponent("Hello! I'm interested in booking a Uganda safari tour. I've been chatting with your virtual consultant and would like to speak with a booking specialist for personalized assistance.");
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen && messages.length === 0) {
+      setTimeout(() => {
+        simulateTyping(() => {
+          addMessage("Hello! Welcome to Everything Uganda Adventures.\n\nI'm your virtual safari consultant, ready to help you plan the perfect Uganda wildlife experience.\n\nHow may I assist you today?", true);
+          setTimeout(() => setShowQuickReplies(true), 500);
+        }, 1000);
+      }, 500);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const quickReplies = [
+    "Show me available tour packages",
+    "Gorilla trekking information", 
+    "Budget-friendly safari options",
+    "I want to make a booking"
+  ];
+
+  const suggestions = [
+    "Tell me about Murchison Falls tours",
+    "What wildlife will I see?",
+    "3-day safari packages", 
+    "Luxury flying safari options"
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[998] transition-all duration-300 lg:hidden"
+          onClick={toggleChat}
+        />
+      )}
+      
+      <div className="fixed bottom-4 right-4 z-[1000] font-sans">
+        
+        <div className={`
+          transition-all duration-300 ease-out bg-white shadow-2xl overflow-hidden
+          ${isOpen ? 'scale-100 translate-y-0 opacity-100 visible' : 'scale-95 translate-y-2 opacity-0 invisible'}
+          
+          /* Desktop: popup positioned above button */
+          lg:absolute lg:bottom-16 lg:right-0 lg:w-96 lg:h-auto lg:max-h-[80vh] lg:min-h-[520px] lg:rounded-xl lg:origin-bottom-right lg:flex lg:flex-col
+          
+          /* Mobile and Tablet: full screen overlay */
+          max-lg:fixed max-lg:inset-0 max-lg:w-full max-lg:h-full max-lg:rounded-none max-lg:flex max-lg:flex-col max-lg:z-[999]
+        `}>
+          
+          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" width="20" height="20" className="text-green-100">
+                <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12c0 1.75.46 3.39 1.25 4.81L2 22l5.19-1.25C8.61 21.54 10.25 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+                <path fill="currentColor" d="M8.5 7.5c0-.28.22-.5.5-.5h6c.28 0 .5.22.5.5s-.22.5-.5.5H9c-.28 0-.5-.22-.5-.5zm0 3c0-.28.22-.5.5-.5h6c.28 0 .5.22.5.5s-.22.5-.5.5H9c-.28 0-.5-.22-.5-.5zm0 3c0-.28.22-.5.5-.5h4c.28 0 .5.22.5.5s-.22.5-.5.5H9c-.28 0-.5-.22-.5-.5z"/>
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-semibold m-0">Everything Uganda Adventures</h4>
+              <div className="text-xs opacity-90 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0"></span>
+                <span>Virtual Safari Consultant</span>
+              </div>
+            </div>
+            <button 
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors flex-shrink-0"
+              onClick={toggleChat}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-3 py-2 bg-gray-50 scroll-smooth min-h-0">
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex mb-3 ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
+                <div className="max-w-[85%]">
+                  <div className={`px-3 py-2 rounded-xl text-xs leading-relaxed shadow-sm whitespace-pre-line ${
+                    msg.isBot 
+                      ? 'bg-white text-gray-800 rounded-bl-sm' 
+                      : 'bg-green-600 text-white rounded-br-sm'
+                  } animate-in slide-in-from-bottom-1 duration-200`}>
+                    {msg.content}
+                  </div>
+                  <div className={`text-xs text-gray-500 mt-0.5 px-1 ${msg.isBot ? 'text-left' : 'text-right'}`}>
+                    {msg.time}
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {isTyping && (
+              <div className="flex justify-start mb-3">
+                <div className="bg-white px-4 py-3 rounded-xl rounded-bl-sm shadow-sm animate-in slide-in-from-bottom-1 duration-200 max-w-[85%]">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                    </div>
+                    <span className="text-xs text-gray-500">Safari consultant is typing...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showQuickReplies && messages.length > 0 && (
+              <div className="mt-3 animate-in slide-in-from-bottom-2 duration-300">
+                <p className="text-xs text-gray-500 mb-2 px-1">Suggested questions:</p>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {(messages.length === 1 ? quickReplies : suggestions).map((reply, index) => (
+                    <button
+                      key={index}
+                      className="bg-white border border-gray-200 px-3 py-2.5 rounded-lg text-xs text-left transition-all hover:bg-gray-50 hover:border-green-500 hover:shadow-sm"
+                      onClick={() => handleQuickReply(reply)}
+                    >
+                      {reply}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="bg-white border-t border-gray-100 p-3 flex-shrink-0">
+            <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-3 py-2">
+              <textarea
+                ref={inputRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about safari packages..."
+                rows="1"
+                className="flex-1 bg-transparent border-none outline-none resize-none text-xs leading-5 max-h-20 py-1 placeholder-gray-500"
+              />
+              <button 
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${
+                  message.trim() 
+                    ? 'bg-green-600 text-white hover:bg-green-700 hover:scale-105' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                onClick={handleSendMessage}
+                disabled={!message.trim()}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            
+            <button
+              onClick={handleWhatsAppRedirect}
+              className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.473 3.516"/>
+              </svg>
+              Continue on WhatsApp for Booking
+            </button>
+          </div>
+        </div>
+
+        <button 
+          className={`relative bg-green-500 hover:bg-green-600 rounded-full px-4 py-3 flex items-center gap-3 shadow-lg transition-all duration-300 ease-out ${
+            isOpen 
+              ? 'w-12 h-12 px-0 py-0 justify-center' 
+              : 'hover:shadow-green-500/30 hover:scale-105'
+          }`}
+          onClick={toggleChat}
+          style={{
+            boxShadow: isOpen 
+              ? '0 8px 32px rgba(34, 197, 94, 0.3)' 
+              : '0 4px 20px rgba(34, 197, 94, 0.4)'
+          }}
+        >
+          {isOpen ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" width="20" height="20" className="text-white flex-shrink-0">
+                <path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.473 3.516"/>
+              </svg>
+              <span className="text-white font-medium text-sm whitespace-nowrap">Chat with Us</span>
+            </>
+          )}
+        </button>
+      </div>
+    </>
+  );
+};
+
+export default GuideBot;
