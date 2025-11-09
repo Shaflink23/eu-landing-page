@@ -82,14 +82,14 @@ export const submitFormData = async (formData: any): Promise<
       dream_escape_words: formData.dreamWords || 'adventure, culture, nature',
 
       // Travel dates from Step 2 - Add full date strings
-      travel_month: extractMonthFromDateRange(formData.startDate),
-      travel_year: extractYearFromDateRange(formData.startDate),
+      travel_month: formData.startDate ? extractMonthFromDateRange(formData.startDate) : new Date().getMonth() + 1,
+      travel_year: formData.startDate ? extractYearFromDateRange(formData.startDate) : new Date().getFullYear(),
       preferred_start_date: formData.startDate || undefined,
       preferred_end_date: formData.endDate || undefined,
 
       // Group info from Step 2
       group_type: (formData.companion?.toLowerCase() || 'solo') as any,
-      group_size: calculateGroupSize(formData.companion),
+      group_size: formData.companion ? calculateGroupSize(formData.companion) : 1,
 
       // Experiences from Step 2 - MUST BE EXACTLY 3 VALID EXPERIENCES
       must_have_experiences: formatExperiences(formData.experiences || []) as any,
@@ -250,20 +250,20 @@ function calculateGroupSize(companion: string): number {
 function formatExperiences(experiences: string[]): string[] {
   if (!experiences || experiences.length === 0) {
     // Return default experiences that backend accepts
-    return ['gorilla_trekking', 'wildlife_safaris', 'cultural_immersion'];
+      return ['gorilla_trekking', 'safari_conservation', 'spiritual_cultural'];
   }
   
-  // Map form values to ONLY backend accepted enum values
+  // Direct mapping - form values are already the exact backend enum values
   const mapping: { [key: string]: string } = {
-    // From DreamTripForm experience values - map to backend accepted values
-    'gorilla': 'gorilla_trekking',
-    'village': 'cultural_immersion',
-    'nile': 'adventure_activities',
-    'food': 'cultural_immersion',
-    'safari': 'wildlife_safaris',
-    'spiritual': 'spiritual_cultural',
-    'coffee': 'cultural_immersion',
-    'music': 'cultural_immersion',
+    'gorilla_trekking': 'gorilla_trekking',
+    'homestays_villages': 'homestays_villages',
+    'nile_adventure': 'nile_adventure',
+    'food_nightlife': 'food_nightlife',
+    'safari_conservation': 'safari_conservation',
+    'spiritual_cultural': 'spiritual_cultural',
+    'community_weaving': 'community_weaving',
+    'birdlife_explorations': 'birdlife_explorations',
+    'lakeside_luxe': 'lakeside_luxe',
   };
   
   const formatted = experiences.map(exp => {
@@ -279,8 +279,8 @@ function formatExperiences(experiences: string[]): string[] {
   // Remove duplicates
   const unique = Array.from(new Set(formatted));
   
-  // Ensure we have exactly 3 experiences
-  const validDefaults = ['gorilla_trekking', 'wildlife_safaris', 'cultural_immersion', 'spiritual_cultural', 'adventure_activities'];
+  // Ensure we have exactly 3 experiences - use ONLY backend accepted values
+  const validDefaults = ['gorilla_trekking', 'safari_conservation', 'spiritual_cultural', 'homestays_villages', 'nile_adventure', 'food_nightlife', 'lakeside_luxe', 'birdlife_explorations', 'community_weaving'];
   
   while (unique.length < 3) {
     for (const def of validDefaults) {

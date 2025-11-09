@@ -21,6 +21,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [submissionData, setSubmissionData] = React.useState<any>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,21 +39,21 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         name: initialData.name || "",
         email: initialData.email || "",
         phone: initialData.phone || "",
-        country_of_residence: initialData.country || "",
+        country_of_residence: initialData.country || "Unknown",
         been_to_africa_before: initialData.beenToAfrica === 'yes',
-        travel_style: initialData.travellerType || [],
-        dream_escape_words: initialData.dreamWords || "",
-        heard_about_us: initialData.hearAbout ? initialData.hearAbout[0] : "",
+        travel_style: initialData.travellerType ? [initialData.travellerType].flat() : ["adventurer"],
+        dream_escape_words: initialData.dreamWords || "adventure, culture, nature",
+        heard_about_us: initialData.hearAbout && initialData.hearAbout.length > 0 ? initialData.hearAbout[0] : "other",
         feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
-        travel_photo_url: initialData.photo || "",
-        travel_month: initialData.travelMonth || null,
-        travel_year: initialData.travelYear || null,
-        preferred_start_date: initialData.startDate || "",
-        preferred_end_date: initialData.endDate || "",
-        group_type: initialData.companion || "",
-        group_size: initialData.groupSize || null,
-        must_have_experiences: initialData.experiences || [],
-        accessibility_dietary_preferences: initialData.preferences || "",
+        travel_photo_url: initialData.photo || "https://example.com/travel-photo.jpg",
+        travel_month: initialData.startDate ? new Date(initialData.startDate).getMonth() + 1 : new Date().getMonth() + 1,
+        travel_year: initialData.startDate ? new Date(initialData.startDate).getFullYear() : new Date().getFullYear(),
+        preferred_start_date: initialData.startDate || null,
+        preferred_end_date: initialData.endDate || null,
+        group_type: initialData.companion || "solo",
+        group_size: initialData.companion ? (initialData.companion === 'friends' || initialData.companion === 'family' ? 4 : initialData.companion === 'couple' ? 2 : 1) : 1,
+        must_have_experiences: initialData.experiences && initialData.experiences.length > 0 ? initialData.experiences : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
+        accessibility_dietary_preferences: initialData.preferences || "None",
         send_options: "both",
         join_early_explorer: true,
         email_opt_in: keepUpdated

@@ -287,13 +287,12 @@ export const travellerVibesSchema = z.object({
 
 // Dream Trip Form Schema
 export const dreamTripSchema = z.object({
-  travelDate: z.string()
-    .min(1, 'Please select a travel month'),
-
   startDate: z.string()
+    .min(1, 'Please select a start date')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid start date'),
 
   endDate: z.string()
+    .min(1, 'Please select an end date')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid end date'),
 
   experiences: z.array(z.string())

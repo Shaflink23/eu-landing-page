@@ -27,7 +27,6 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     getFieldError,
     hasFieldError
   } = useFormValidation(dreamTripSchema, {
-    travelDate: initialData.travelDate || '',
     startDate: initialData.startDate || '',
     endDate: initialData.endDate || '',
     experiences: initialData.experiences || [],
@@ -68,14 +67,15 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   };
 
   const experiences = [
-    { value: 'gorilla', label: 'Gorilla Trekking & Forest Lodges', emoji: '🦍', color: 'from-green-500 to-emerald-600' },
-    { value: 'village', label: 'Village Homestays & Cultural Weaving', emoji: '🏡', color: 'from-orange-500 to-amber-600' },
-    { value: 'nile', label: 'Nile Adventures & Lakeside Glamping', emoji: '🛶', color: 'from-blue-500 to-cyan-600' },
-    { value: 'food', label: 'Food, Coffee & Kampala Nights', emoji: '🍛', color: 'from-red-500 to-pink-600' },
-    { value: 'safari', label: 'Safari & Conservation Trails', emoji: '🦓', color: 'from-yellow-500 to-orange-600' },
-    { value: 'spiritual', label: 'Spiritual Journeys & Hidden Temples', emoji: '🕯️', color: 'from-purple-500 to-indigo-600' },
-    { value: 'coffee', label: 'Local Coffee & Artisan Markets', emoji: '☕', color: 'from-amber-600 to-yellow-600' },
-    { value: 'music', label: 'Music, Story Circles & Dance', emoji: '🎶', color: 'from-pink-500 to-rose-600' },
+    { value: 'gorilla_trekking', label: 'Gorilla Trekking & Forest Lodges', emoji: '🦍', color: 'from-green-500 to-emerald-600' },
+    { value: 'homestays_villages', label: 'Village Homestays & Cultural Weaving', emoji: '🏡', color: 'from-orange-500 to-amber-600' },
+    { value: 'nile_adventure', label: 'Nile Adventures & Lakeside Glamping', emoji: '🛶', color: 'from-blue-500 to-cyan-600' },
+    { value: 'food_nightlife', label: 'Food, Coffee & Kampala Nights', emoji: '🍛', color: 'from-red-500 to-pink-600' },
+    { value: 'safari_conservation', label: 'Safari & Conservation Trails', emoji: '🦓', color: 'from-yellow-500 to-orange-600' },
+    { value: 'spiritual_cultural', label: 'Spiritual Journeys & Hidden Temples', emoji: '🕯️', color: 'from-purple-500 to-indigo-600' },
+    { value: 'community_weaving', label: 'Local Artisan Markets & Weaving', emoji: '🧵', color: 'from-amber-600 to-yellow-600' },
+    { value: 'birdlife_explorations', label: 'Birdlife & Wildlife Explorations', emoji: '🐦', color: 'from-pink-500 to-rose-600' },
+    { value: 'lakeside_luxe', label: 'Lakeside Luxury Retreats', emoji: '🏖️', color: 'from-cyan-500 to-blue-600' },
   ];
 
   const handleExperienceToggle = (experience: string) => {
@@ -93,18 +93,16 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   };
 
   console.log('🎯 DreamTripForm validation:', {
-    travelDate: formData.travelDate,
     startDate: formData.startDate,
     endDate: formData.endDate,
     experiences: formData.experiences?.length,
     companion: formData.companion,
     experiencesSelected: formData.experiences?.length === 3,
     startDateSelected: !!formData.startDate,
-    endDateSelected: !!formData.endDate,
-    travelDateSelected: !!formData.travelDate
+    endDateSelected: !!formData.endDate
   });
 
-  const isFormValid = formData.travelDate && formData.startDate && formData.endDate && (formData.experiences?.length === 3);
+  const isFormValid = formData.startDate && formData.endDate && (formData.experiences?.length === 3);
 
   const companionOptions = [
     { value: 'solo', label: 'Solo', subtitle: 'Just me', emoji: '👤' },
@@ -172,166 +170,115 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Travel Date Selection */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <label 
-                className="block text-gray-700 mb-2"
-                style={{ 
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
-                }}
-              >
-                When are you planning to travel? *
-              </label>
-              <select
-                value={formData.travelDate}
-                onChange={(e) => {
-                  setFieldValue('travelDate', e.target.value);
-                  setFieldValue('startDate', '');
-                  setFieldValue('endDate', '');
-                  setShowCalendar(true);
-                }}
-                className="px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                style={{ 
-                  width: '270px', 
-                  height: '40px',
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
-                }}
-                required
-              >
-                <option value="">Select travel date</option>
-                {dateOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
+           {/* Date Range Selection */}
+           <motion.div
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             transition={{ delay: 0.2 }}
+           >
+             <label
+               className="block text-gray-700 mb-4"
+               style={{
+                 fontSize: '14px',
+                 fontFamily: 'Roboto, sans-serif',
+                 fontWeight: 400
+               }}
+             >
+               When are you planning to travel? *
+             </label>
 
-              {/* Date Range Display */}
-              {formData.startDate && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
-                >
-                  <p 
-                    className="font-medium text-green-800"
-                    style={{ 
-                      fontSize: '14px', 
-                      fontFamily: 'Roboto, sans-serif', 
-                      fontWeight: 400 
-                    }}
-                  >
-                    Selected dates: {formatDateRange()}
-                  </p>
-                </motion.div>
-              )}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {/* Start Date */}
+               <div>
+                 <label
+                   className="block text-gray-600 mb-2 text-sm"
+                   style={{
+                     fontSize: '12px',
+                     fontFamily: 'Roboto, sans-serif',
+                     fontWeight: 400
+                   }}
+                 >
+                   Start Date
+                 </label>
+                 <input
+                   type="date"
+                   value={formData.startDate || ''}
+                   onChange={handleStartDateChange}
+                   min={getMinDate()}
+                   className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                   style={{
+                     height: '40px',
+                     fontSize: '14px',
+                     fontFamily: 'Roboto, sans-serif',
+                     fontWeight: 400
+                   }}
+                   required
+                 />
+               </div>
 
-              {/* Calendar Picker */}
-              {showCalendar && formData.travelDate && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-4 p-4 bg-white border-2 border-green-200 rounded-lg"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 
-                      className="font-semibold text-gray-800"
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 500 
-                      }}
-                    >
-                      Select your travel dates
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => setShowCalendar(false)}
-                      className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  
-                  <div className="text-center mb-4">
-                    <h4 
-                      className="font-medium text-gray-700"
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
-                      }}
-                    >
-                      {formData.travelDate}
-                    </h4>
-                  </div>
+               {/* End Date */}
+               <div>
+                 <label
+                   className="block text-gray-600 mb-2 text-sm"
+                   style={{
+                     fontSize: '12px',
+                     fontFamily: 'Roboto, sans-serif',
+                     fontWeight: 400
+                   }}
+                 >
+                   End Date
+                 </label>
+                 <input
+                   type="date"
+                   value={formData.endDate || ''}
+                   onChange={handleEndDateChange}
+                   min={formData.startDate || getMinDate()}
+                   className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                   style={{
+                     height: '40px',
+                     fontSize: '14px',
+                     fontFamily: 'Roboto, sans-serif',
+                     fontWeight: 400
+                   }}
+                   required
+                 />
+               </div>
+             </div>
 
-                  {/* Calendar Grid */}
-                  <div className="grid grid-cols-7 gap-1 text-center">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                      <div 
-                        key={day} 
-                        className="p-2 text-gray-600 font-semibold"
-                        style={{ 
-                          fontSize: '12px', 
-                          fontFamily: 'Roboto, sans-serif', 
-                          fontWeight: 500 
-                        }}
-                      >
-                        {day}
-                      </div>
-                    ))}
-                    
-                    {generateCalendarDays().map((dayObj, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        disabled={!dayObj.date}
-                        onClick={() => handleDateClick(dayObj.date)}
-                        className={`p-2 text-center rounded-md transition-all ${
-                          !dayObj.date 
-                            ? 'invisible' 
-                            : isDateInRange(dayObj.date!) 
-                            ? 'bg-green-500 text-white' 
-                            : 'hover:bg-green-100 text-gray-700'
-                        }`}
-                        style={{ 
-                          fontSize: '12px', 
-                          fontFamily: 'Roboto, sans-serif', 
-                          fontWeight: 400 
-                        }}
-                      >
-                        {dayObj.day}
-                      </button>
-                    ))}
-                  </div>
+             {/* Date Range Display */}
+             {formData.startDate && formData.endDate && (
+               <motion.div
+                 initial={{ opacity: 0, y: -10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
+               >
+                 <p
+                   className="font-medium text-green-800 text-center"
+                   style={{
+                     fontSize: '14px',
+                     fontFamily: 'Roboto, sans-serif',
+                     fontWeight: 400
+                   }}
+                 >
+                   🗓️ Your trip: {formatDateRange()}
+                 </p>
+               </motion.div>
+             )}
 
-                  <div className="mt-3 text-center">
-                    <p 
-                      className="text-gray-600"
-                      style={{ 
-                        fontSize: '12px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
-                      }}
-                    >
-                      {!formData.startDate 
-                        ? 'Click a date to start selecting your travel period'
-                        : !formData.endDate 
-                        ? 'Click another date to complete your travel period'
-                        : 'Travel dates selected! Click anywhere to modify.'
-                      }
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
+             {/* Helper Text */}
+             <div className="mt-2">
+               <p
+                 className="text-gray-600"
+                 style={{
+                   fontSize: '12px',
+                   fontFamily: 'Roboto, sans-serif',
+                   fontWeight: 400
+                 }}
+               >
+                 💡 Select your preferred start and end dates for the Uganda adventure
+               </p>
+             </div>
+           </motion.div>
 
             {/* Dream Experiences */}
             <motion.div
