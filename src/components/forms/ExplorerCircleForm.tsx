@@ -55,7 +55,10 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         group_type: (initialData.companion === 'solo' || initialData.companion === 'couple' || initialData.companion === 'family' || initialData.companion === 'friends')
           ? (initialData.companion === 'family' || initialData.companion === 'friends' ? 'group' : initialData.companion)
           : "solo",
-        group_size: initialData.companion ? (initialData.companion === 'friends' || initialData.companion === 'family' ? 4 : initialData.companion === 'couple' ? 2 : 1) : 1,
+        group_size: initialData.companion ? 
+          (initialData.companion === 'friends' || initialData.companion === 'family' 
+            ? (initialData.companionCount ? parseInt(initialData.companionCount) : 4) 
+            : initialData.companion === 'couple' ? 2 : 1) : 1,
         must_have_experiences: Array.isArray(initialData.experiences) && initialData.experiences.length >= 3
           ? initialData.experiences.slice(0, 3) // Take first 3, ensure exactly 3
           : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
@@ -194,7 +197,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
             <h2 
               className="text-gray-900 mb-3"
               style={{ 
-                fontSize: '48px', 
+                fontSize: '32px', 
                 fontFamily: 'Roboto, sans-serif', 
                 fontWeight: 400 
               }}
@@ -209,7 +212,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                 fontWeight: 400 
               }}
             >
-              You're almost done! Join the circle for exclusive benefits and updates.
+              You're almost done! Join Our Community: Stay updated and get insider access to Uganda's top experiences, exclusive deals, and behind-the-scenes stories.
             </p>
           </motion.div>
 
@@ -314,7 +317,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                 </>
               ) : (
                 <>
-                  Finish & Get My Guide
+                  Submit & Get My Guide
                   <svg 
                     width="16" 
                     height="16" 

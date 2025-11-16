@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { FormSubmissionRequest, UgandaFormSuccessResponse, RegularFormSuccessResponse } from '../types';
 
-const API_BASE_URL = 'http://api.everythinguganda.co.uk/api';
+const API_BASE_URL = 'https://api.everythinguganda.co.uk/api';
 // Note: Backend URL endpoint might be 'form-submissons' (with typo) or 'form-submissions'
 const FORM_ENDPOINT = '/form-submissions'; // Try this first, fallback to /form-submissons if needed
 

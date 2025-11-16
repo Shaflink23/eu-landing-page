@@ -303,6 +303,9 @@ export const dreamTripSchema = z.object({
   companion: z.string()
     .min(1, 'Please select who is traveling with you'),
 
+  companionCount: z.string()
+    .optional(),
+
   dreamWords: z.string()
     .max(100, 'Dream description must be less than 100 characters')
     .optional()

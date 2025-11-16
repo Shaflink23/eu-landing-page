@@ -67,7 +67,7 @@ const GuideBot = () => {
     // Greeting responses
     if (msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
       return {
-        response: "Hello and welcome to Everything Uganda Adventures!\n\nI'm your virtual tour consultant, here to help you discover our amazing safari packages and answer your questions about Uganda's incredible wildlife experiences.\n\nHow may I assist you today?",
+        response: "Hello, Welcome to Everything Uganda.\n\nMy name is Nambi, your virtual travel assistant, ready to help you plan the perfect Ugandan Experience\n\nHow may I assist you today?",
         showSuggestions: true
       };
     }
@@ -151,7 +151,7 @@ const GuideBot = () => {
     if (!isOpen && messages.length === 0) {
       setTimeout(() => {
         simulateTyping(() => {
-          addMessage("Hello! Welcome to Everything Uganda Adventures.\n\nI'm your virtual safari consultant, ready to help you plan the perfect Uganda wildlife experience.\n\nHow may I assist you today?", true);
+          addMessage("Hello, Welcome to Everything Uganda.\n\nMy name is Nambi, your virtual travel assistant, ready to help you plan the perfect Ugandan Experience\n\nHow may I assist you today?", true);
           setTimeout(() => setShowQuickReplies(true), 500);
         }, 1000);
       }, 500);
@@ -209,10 +209,10 @@ const GuideBot = () => {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold m-0">Everything Uganda Adventures</h4>
+              <h4 className="text-sm font-semibold m-0">Everything Uganda</h4>
               <div className="text-xs opacity-90 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0"></span>
-                <span>Virtual Safari Consultant</span>
+                <span>Nambi your Virtual Assistant</span>
               </div>
             </div>
             <button 

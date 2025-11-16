@@ -47,6 +47,68 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
     uploadedUrl: null,
   });
 
+  const [countrySearch, setCountrySearch] = React.useState('');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = React.useState(false);
+  const countryDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Top countries to display
+  const topCountries = [
+    'United Kingdom',
+    'United States',
+    'Canada',
+    'United Arab Emirates',
+    'Saudi Arabia',
+    'Australia',
+    'Germany',
+    'Uganda'
+  ];
+
+  // Comprehensive list of all countries
+  const allCountries = [
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+    'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+    'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
+    'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
+    'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'East Timor', 'Ecuador',
+    'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France',
+    'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau',
+    'Guyana', 'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland',
+    'Israel', 'Italy', 'Ivory Coast', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo',
+    'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania',
+    'Luxembourg', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius',
+    'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia',
+    'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway',
+    'Oman', 'Pakistan', 'Palau', 'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland',
+    'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino',
+    'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands',
+    'Somalia', 'South Africa', 'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland',
+    'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey',
+    'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu',
+    'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+  ];
+
+  // Filter countries based on search
+  const filteredCountries = React.useMemo(() => {
+    if (!countrySearch) {
+      return topCountries;
+    }
+    return allCountries.filter(country =>
+      country.toLowerCase().includes(countrySearch.toLowerCase())
+    );
+  }, [countrySearch]);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const travellerTypes = [
     { value: 'adventurer', label: 'Adventurer', emoji: '🏔️' },
     { value: 'cultural_immerser', label: 'Cultural Immerser', emoji: '🎭' },
@@ -59,7 +121,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
     { value: 'tiktok', label: 'TikTok', emoji: '📱' },
     { value: 'instagram', label: 'Instagram', emoji: '📷' },
     { value: 'word_of_mouth', label: 'Word of Mouth', emoji: '💬' },
-    { value: 'uk_travel_group', label: 'UK Travel Group', emoji: '🇬🇧' },
+    { value: 'uk_travel_group', label: 'Travel Group', emoji: '🌍' },
     { value: 'event_expo', label: 'Event/Expo', emoji: '🎪' },
     { value: 'other', label: 'Other', emoji: '⭐' },
   ];
@@ -210,7 +272,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     fontWeight: 400
                   }}
                 >
-                  Your Name
+                  Your Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -248,7 +310,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     fontWeight: 400
                   }}
                 >
-                  Email Address
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -288,7 +350,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   fontWeight: 400
                 }}
               >
-                Phone Number (Optional)
+                Phone Number <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -306,6 +368,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   maxWidth: '270px'
                 }}
                 placeholder="+1 (555) 123-4567"
+                required
               />
               {getFieldError('phone') && (
                 <p className="text-red-600 text-sm mt-1">{getFieldError('phone')}</p>
@@ -329,31 +392,92 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 >
                   Country of Residence
                 </label>
-                <select
-                  value={formData.country || ''}
-                  onChange={(e) => setFieldValue('country', e.target.value)}
-                  onBlur={() => setFieldTouched('country')}
-                  className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
-                    hasFieldError('country') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                  }`}
-                  style={{
-                    height: '40px',
-                    fontSize: '14px',
-                    fontFamily: 'Roboto, sans-serif',
-                    fontWeight: 400,
-                    maxWidth: '270px'
-                  }}
-                  required
-                >
-                  <option value="">Select your country</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="United States">United States</option>
-                  <option value="Canada">Canada</option>
-                  <option value="Australia">Australia</option>
-                  <option value="Germany">Germany</option>
-                  <option value="France">France</option>
-                  <option value="Other">Other</option>
-                </select>
+                
+                {/* Custom Searchable Dropdown */}
+                <div ref={countryDropdownRef} className="relative" style={{ maxWidth: '270px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                    onBlur={() => setFieldTouched('country')}
+                    className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-left flex items-center justify-between ${
+                      hasFieldError('country') ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                    }`}
+                    style={{
+                      height: '40px',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, sans-serif',
+                      fontWeight: 400,
+                    }}
+                  >
+                    <span className={formData.country ? 'text-gray-900' : 'text-gray-500'}>
+                      {formData.country || 'Select your country'}
+                    </span>
+                    <svg 
+                      className={`w-5 h-5 transition-transform ${isCountryDropdownOpen ? 'transform rotate-180' : ''}`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isCountryDropdownOpen && (
+                    <div 
+                      className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
+                      style={{ maxHeight: '300px' }}
+                    >
+                      {/* Search Input */}
+                      <div className="p-2 border-b border-gray-200 sticky top-0" style={{ backgroundColor: '#e7f8ee' }}>
+                        <input
+                          type="text"
+                          value={countrySearch}
+                          onChange={(e) => setCountrySearch(e.target.value)}
+                          placeholder="Search your country"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          style={{
+                            fontSize: '14px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 400,
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+
+                      {/* Country List */}
+                      <div className="overflow-y-auto" style={{ maxHeight: '240px' }}>
+                        {filteredCountries.length > 0 ? (
+                          filteredCountries.map((country) => (
+                            <button
+                              key={country}
+                              type="button"
+                              onClick={() => {
+                                setFieldValue('country', country);
+                                setIsCountryDropdownOpen(false);
+                                setCountrySearch('');
+                              }}
+                              className={`w-full px-3 py-2 text-left hover:bg-gray-100 transition-colors ${
+                                formData.country === country ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-900'
+                              }`}
+                              style={{
+                                fontSize: '14px',
+                                fontFamily: 'Roboto, sans-serif',
+                                fontWeight: formData.country === country ? 500 : 400,
+                              }}
+                            >
+                              {country}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-4 text-center text-gray-500" style={{ fontSize: '14px' }}>
+                            No countries found
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
 
               <motion.div
@@ -899,7 +1023,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-600">Your journey starts here !</p>
+                  <p className="text-sm text-gray-600">Explore Uganda's vibrant culture and stunning landscapes" </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#000000' }}>
@@ -919,7 +1043,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-600">Authentic experiences await !</p>
+                  <p className="text-sm text-gray-600">Experience the Pearl of Africa like never before! </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#000000' }}>
@@ -939,7 +1063,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-600">Tailored just for you !</p>
+                  <p className="text-sm text-gray-600">Are You Ready to meet the Mountain Gorillas? </p>
                 </div>
               </div>
             </div>

@@ -28,14 +28,16 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     endDate: initialData.endDate || '',
     experiences: initialData.experiences || [],
     companion: initialData.companion || '',
+    companionCount: initialData.companionCount || '',
     dreamWords: initialData.dreamWords || '',
   });
 
-  // Calculate minimum date (next month)
+  // Calculate minimum date (20 days from today)
   const getMinDate = () => {
     const today = new Date();
-    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    return nextMonth.toISOString().split('T')[0];
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() + 20);
+    return minDate.toISOString().split('T')[0];
   };
 
   const formatDateRange = () => {
@@ -63,16 +65,72 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     setFieldValue('endDate', endDate);
   };
 
+  const [hoveredExperience, setHoveredExperience] = React.useState<string | null>(null);
+
   const experiences = [
-    { value: 'gorilla_trekking', label: 'Gorilla Trekking & Forest Lodges', emoji: '🦍', color: 'from-green-500 to-emerald-600' },
-    { value: 'homestays_villages', label: 'Village Homestays & Cultural Weaving', emoji: '🏡', color: 'from-orange-500 to-amber-600' },
-    { value: 'nile_adventure', label: 'Nile Adventures & Lakeside Glamping', emoji: '🛶', color: 'from-blue-500 to-cyan-600' },
-    { value: 'food_nightlife', label: 'Food, Coffee & Kampala Nights', emoji: '🍛', color: 'from-red-500 to-pink-600' },
-    { value: 'safari_conservation', label: 'Safari & Conservation Trails', emoji: '🦓', color: 'from-yellow-500 to-orange-600' },
-    { value: 'spiritual_cultural', label: 'Spiritual Journeys & Hidden Temples', emoji: '🕯️', color: 'from-purple-500 to-indigo-600' },
-    { value: 'community_weaving', label: 'Local Artisan Markets & Weaving', emoji: '🧵', color: 'from-amber-600 to-yellow-600' },
-    { value: 'birdlife_explorations', label: 'Birdlife & Wildlife Explorations', emoji: '🐦', color: 'from-pink-500 to-rose-600' },
-    { value: 'lakeside_luxe', label: 'Lakeside Luxury Retreats', emoji: '🏖️', color: 'from-cyan-500 to-blue-600' },
+    { 
+      value: 'gorilla_trekking', 
+      label: 'Wildlife, Safari & Forest Expeditions', 
+      emoji: '🦍', 
+      color: 'from-green-500 to-emerald-600',
+      description: "Track gorillas through misty jungles, spot lions and elephants at sunrise, and unwind in eco-lodges deep in Uganda's ancient wilderness."
+    },
+    { 
+      value: 'homestays_villages', 
+      label: 'Culture, Villages & Local Living', 
+      emoji: '🏡', 
+      color: 'from-orange-500 to-amber-600',
+      description: "Cook with grandmothers, learn ancestral weaving, and share fireside stories in villages where culture, kindness, and heritage thrive."
+    },
+    { 
+      value: 'nile_adventure', 
+      label: 'Nile Adventures & Island Escapes ', 
+      emoji: '🛶', 
+      color: 'from-blue-500 to-cyan-600',
+      description: "Follow the Nile to its source — raft raging rapids, kayak past lush shores, then drift to serene islands and lakeside glampsites kissed by sunset."
+    },
+    { 
+      value: 'food_nightlife', 
+      label: 'Flavours, Coffee & Night Life', 
+      emoji: '🍛', 
+      color: 'from-red-500 to-pink-600',
+      description: "Taste Uganda's creative spirit — from street food and skyline cocktails to highland coffee farms and artisan markets buzzing with life."
+    },
+    { 
+      value: 'safari_conservation', 
+      label: 'Safari & Conservation Trails', 
+      emoji: '🦓', 
+      color: 'from-yellow-500 to-orange-600',
+      description: "Walk alongside rangers and conservationists, witness endangered species in protected habitats, and contribute to wildlife preservation that safeguards Africa's future."
+    },
+    { 
+      value: 'spiritual_cultural', 
+      label: 'Wellness, Rhythm & Renewal', 
+      emoji: '🕯️', 
+      color: 'from-purple-500 to-indigo-600',
+      description: "Breathe in the hills, stretch with sunrise yoga, dance barefoot at drum circles, and find peace where joy and nature flow as one."
+    },
+    { 
+      value: 'community_weaving', 
+      label: 'Local Artisan Markets & Weaving', 
+      emoji: '🧵', 
+      color: 'from-amber-600 to-yellow-600',
+      description: "Discover vibrant markets where skilled artisans craft baskets, textiles, and jewelry — each piece woven with tradition, passion, and centuries-old technique."
+    },
+    { 
+      value: 'birdlife_explorations', 
+      label: 'Birdlife & Wildlife Explorations', 
+      emoji: '🐦', 
+      color: 'from-pink-500 to-rose-600',
+      description: "Journey through wetlands and forests teeming with over 1,000 bird species — from the rare Shoebill to colorful sunbirds painting the canopy with song."
+    },
+    { 
+      value: 'lakeside_luxe', 
+      label: 'Luxe Horizons & Hidden Retreats ', 
+      emoji: '🏖️', 
+      color: 'from-cyan-500 to-blue-600',
+      description: "Soar over savannas and islands to private lodges and spas. Every stay blends first-class comfort with wild landscapes and quiet indulgence."
+    },
   ];
 
   const handleExperienceToggle = (experience: string) => {
@@ -97,7 +155,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     { value: 'solo', label: 'Solo', subtitle: 'Just me', emoji: '👤' },
     { value: 'couple', label: 'Couple', subtitle: 'Two travelers', emoji: '👫' },
     { value: 'friends', label: 'Friends', subtitle: 'Specify number', emoji: '👥' },
-    { value: 'family', label: 'Family', subtitle: 'Specify number', emoji: '�‍👩‍👧‍👦' },
+    { value: 'family', label: 'Family', subtitle: 'Specify number', emoji: '👩‍👧‍👦' },
   ];
 
   return (
@@ -144,9 +202,9 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                 fontWeight: 400 
               }}
             >
-              Craft Your Dream Trip
+              Now, let us build your perfect Ugandan escape.
             </h2>
-            <p 
+            {/* <p 
               className="text-gray-600 mb-6"
               style={{ 
                 fontSize: '16px', 
@@ -155,7 +213,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
               }}
             >
               Now, let us build your perfect Ugandan escape.
-            </p>
+            </p> */}
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -303,56 +361,97 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                   const canSelect = (formData.experiences || []).length < 3 || isSelected;
 
                   return (
-                    <motion.button
-                      key={exp.value}
-                      type="button"
-                      onClick={() => canSelect && handleExperienceToggle(exp.value)}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      disabled={!canSelect}
-                      className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
-                        isSelected
-                          ? 'border-green-500 bg-green-50 text-green-700'
-                          : canSelect
-                          ? 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
-                          : 'border-gray-200 opacity-50 cursor-not-allowed'
-                      }`}
-                      style={{ 
-                        width: '270px', 
-                        height: '40px'
-                      }}
-                    >
-                      <span style={{ fontSize: '16px' }}>{exp.emoji}</span>
-                      <span 
+                    <div key={exp.value} className="relative">
+                      <motion.button
+                        type="button"
+                        onClick={() => canSelect && handleExperienceToggle(exp.value)}
+                        onMouseEnter={() => setHoveredExperience(exp.value)}
+                        onMouseLeave={() => setHoveredExperience(null)}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.4 + index * 0.1 }}
+                        disabled={!canSelect}
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                          isSelected
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : canSelect
+                            ? 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
+                            : 'border-gray-200 opacity-50 cursor-not-allowed'
+                        }`}
                         style={{ 
-                          fontSize: '14px', 
-                          fontFamily: 'Roboto, sans-serif', 
-                          fontWeight: 400 
+                          width: '270px', 
+                          height: '40px'
                         }}
                       >
-                        {exp.label}
-                      </span>
-                      {isSelected && (
-                        <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <svg 
-                            width="14" 
-                            height="14" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            xmlns="http://www.w3.org/2000/svg"
+                        <span style={{ fontSize: '16px' }}>{exp.emoji}</span>
+                        <span 
+                          style={{ 
+                            fontSize: '14px', 
+                            fontFamily: 'Roboto, sans-serif', 
+                            fontWeight: 400 
+                          }}
+                        >
+                          {exp.label}
+                        </span>
+                        {isSelected && (
+                          <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <svg 
+                              width="14" 
+                              height="14" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path 
+                                d="M20 6L9 17L4 12" 
+                                stroke="white" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </motion.button>
+                      
+                      {/* Hover Tooltip */}
+                      {hoveredExperience === exp.value && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute z-50 mt-2 p-4 rounded-lg shadow-xl border border-gray-200 w-80"
+                          style={{ 
+                            fontFamily: 'Roboto, sans-serif',
+                            backgroundColor: '#e6f8ee'
+                          }}
+                        >
+                          <div className="flex items-start gap-3 mb-2">
+                            <span style={{ fontSize: '24px' }}>{exp.emoji}</span>
+                            <h4 
+                              className="font-semibold text-gray-900"
+                              style={{ 
+                                fontSize: '14px',
+                                fontWeight: 500
+                              }}
+                            >
+                              {exp.label}
+                            </h4>
+                          </div>
+                          <p 
+                            className="text-gray-600 leading-relaxed"
+                            style={{ 
+                              fontSize: '13px',
+                              fontWeight: 400,
+                              lineHeight: '1.6'
+                            }}
                           >
-                            <path 
-                              d="M20 6L9 17L4 12" 
-                              stroke="white" 
-                              strokeWidth="2" 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
+                            {exp.description}
+                          </p>
+                        </motion.div>
                       )}
-                    </motion.button>
+                    </div>
                   );
                 })}
               </div>
@@ -402,48 +501,86 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {companionOptions.map((option, index) => (
-                  <motion.button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setFieldValue('companion', option.value)}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.6 + index * 0.1 }}
-                    className={`flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all w-full ${
-                      formData.companion === option.value
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
-                    }`}
-                    style={{ 
-                      maxWidth: '128px', 
-                      height: '96px',
-                      margin: '0 auto'
-                    }}
-                  >
-                    <span style={{ fontSize: '24px' }} className="mb-1">{option.emoji}</span>
-                    <div className="text-center">
-                      <span 
-                        className="block font-medium"
-                        style={{ 
-                          fontSize: '13px', 
-                          fontFamily: 'Roboto, sans-serif', 
-                          fontWeight: 500 
-                        }}
+                  <div key={option.value} className="flex flex-col items-center">
+                    <motion.button
+                      type="button"
+                      onClick={() => setFieldValue('companion', option.value)}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 + index * 0.1 }}
+                      className={`flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all w-full ${
+                        formData.companion === option.value
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
+                      }`}
+                      style={{ 
+                        maxWidth: '128px', 
+                        height: '96px',
+                        margin: '0 auto'
+                      }}
+                    >
+                      <span style={{ fontSize: '24px' }} className="mb-1">{option.emoji}</span>
+                      <div className="text-center">
+                        <span 
+                          className="block font-medium"
+                          style={{ 
+                            fontSize: '13px', 
+                            fontFamily: 'Roboto, sans-serif', 
+                            fontWeight: 500 
+                          }}
+                        >
+                          {option.label}
+                        </span>
+                        <span 
+                          className="text-gray-500 text-xs leading-tight"
+                          style={{ 
+                            fontSize: '11px', 
+                            fontFamily: 'Roboto, sans-serif', 
+                            fontWeight: 400 
+                          }}
+                        >
+                          {option.subtitle}
+                        </span>
+                      </div>
+                    </motion.button>
+                    
+                    {/* Number Input for Friends or Family */}
+                    {formData.companion === option.value && (option.value === 'friends' || option.value === 'family') && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-2 w-full"
+                        style={{ maxWidth: '128px' }}
                       >
-                        {option.label}
-                      </span>
-                      <span 
-                        className="text-gray-500 text-xs leading-tight"
-                        style={{ 
-                          fontSize: '11px', 
-                          fontFamily: 'Roboto, sans-serif', 
-                          fontWeight: 400 
-                        }}
-                      >
-                        {option.subtitle}
-                      </span>
-                    </div>
-                  </motion.button>
+                        <input
+                          type="number"
+                          min="2"
+                          value={formData.companionCount || ''}
+                          onChange={(e) => setFieldValue('companionCount', e.target.value)}
+                          placeholder="Number"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-center"
+                          style={{
+                            fontSize: '12px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 400,
+                            height: '32px'
+                          }}
+                        />
+                        <p 
+                          className="text-gray-500 text-center mt-1"
+                          style={{ 
+                            fontSize: '10px', 
+                            fontFamily: 'Roboto, sans-serif', 
+                            fontWeight: 400 
+                          }}
+                        >
+                          How many?
+                        </p>
+                      </motion.div>
+                    )}
+                  </div>
                 ))}
               </div>
             </motion.div>

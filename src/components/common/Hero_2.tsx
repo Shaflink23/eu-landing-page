@@ -4,7 +4,7 @@ import { JourneyButton } from '../JourneyButton';
 
 export const Hero_2 = () => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  const videoSrc = "/video/uganda video.mp4";
+  const videoSrc = "/video/newest eu vid.mp4";
 
   React.useEffect(() => {
     if (videoRef.current) {
@@ -41,31 +41,18 @@ export const Hero_2 = () => {
                 className="cursor-pointer block"
                 aria-label="Go to Homepage"
               >
-                <div
-                  className="flex items-center justify-center backdrop-blur-md hover:scale-105 transition-transform duration-300 md:w-[100px] md:h-[100px] w-[80px] h-[80px]"
-                  style={{
-                    borderRadius: '50%',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                    overflow: 'hidden',
-                    border: '2px solid rgba(255,255,255,0.4)',
-                    background: 'rgba(255,255,255,0.18)',
-                    WebkitBackdropFilter: 'blur(6px)',
-                    backdropFilter: 'blur(6px)',
-                  }}
-                >
                   <img
                     src="/images/Logo/Everything UG updated logo 1.png"
                     alt="Everything Uganda Logo"
+                    className="hover:scale-105 transition-transform duration-300"
                     style={{
-                      width: '100%',
-                      height: '100%',
+                      width: '100px',
+                      height: '100px',
                       objectFit: 'contain',
-                      borderRadius: '50%',
                     }}
                   />
-                </div>
               </a>
-            </div>
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
@@ -78,17 +65,17 @@ export const Hero_2 = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-3xl md:text-7xl font-bold text-white mb-3 md:mb-4 leading-tight"
+            className="text-2xl md:text-7xl font-bold text-white mb-3 md:mb-4 leading-tight"
             style={{
               textShadow: '2px 4px 8px rgba(0,0,0,0.7)',
               letterSpacing: '-0.02em',
               marginTop: '0px'
             }}
           >
-            Discover the Uganda You Have
+            Step Into the Heart of Uganda.  
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-300 to-green-500">
-              Never Been Told About
+              Untamed,Unseen,Unforgettable  
             </span>
           </motion.h1>
 
@@ -97,10 +84,10 @@ export const Hero_2 = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
-            className="text-base md:text-2xl text-gray-100 mb-4 md:mb-8 font-light"
+            className="text-sm md:text-2xl text-gray-100 mb-4 md:mb-8 font-light"
             style={{ textShadow: '1px 2px 4px rgba(0,0,0,0.6)' }}
           >
-            Where every journey tells a story and you are part of it.
+            Where every story, smile and landscape has a soul.
           </motion.p>
 
           {/* Overlay Text Box */}
