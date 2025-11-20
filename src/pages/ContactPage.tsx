@@ -4,9 +4,11 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -57,12 +59,10 @@ export const ContactPage = () => {
   });
 
   const onSubmit = async (data: ContactFormData) => {
-    // Simulate form submission
     console.log('Contact form submitted:', data);
     setIsSubmitted(true);
     reset();
     
-    // Reset success message after 5 seconds
     setTimeout(() => setIsSubmitted(false), 5000);
   };
 
@@ -80,17 +80,17 @@ export const ContactPage = () => {
         </div>
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1
-            className="text-3xl md:text-5xl font-bold mb-4 font-serif tracking-wide"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            className="text-3xl md:text-5xl font-bold mb-4 font-heading tracking-wide"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
             Get in Touch
           </motion.h1>
           <motion.p
-            className="text-lg md:text-xl max-w-3xl mx-auto leading-relaxed"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            className="text-lg md:text-xl max-w-3xl mx-auto leading-relaxed font-body"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             Ready to plan your Uganda adventure? We're here to help you create 
@@ -106,50 +106,47 @@ export const ContactPage = () => {
             <div className="px-8">
               <motion.div
                 className="mb-12"
-                initial={{ x: -30, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">Let's Start Planning</h2>
-                <p className="text-lg text-gray-600 mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-6 font-heading">Let us Start Planning</h2>
+                <p className="text-lg text-gray-600 mb-8 font-body">
                   Whether you're interested in gorilla trekking, cultural experiences, or luxury safaris, 
                   our team of Uganda experts is ready to help you plan the perfect adventure.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {contactInfo.map((item, index) => (
-                    <motion.div
+                  {contactInfo.map((item) => (
+                    <div
                       key={item.title}
                       className="bg-emerald-50 p-6 rounded-lg border border-emerald-100 hover:shadow-lg transition-shadow duration-300"
-                      initial={{ y: 30, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
                     >
                       <div className="flex items-start space-x-3">
                         <item.icon className="h-6 w-6 text-emerald-600 mt-1 flex-shrink-0" />
                         <div>
-                          <h4 className="font-semibold text-emerald-800 text-sm mb-2">{item.title}</h4>
-                          <p className="text-xs text-gray-700 leading-relaxed mb-1">{item.details}</p>
-                          <p className="text-xs text-gray-700 leading-relaxed">{item.description}</p>
+                          <h4 className="font-semibold text-emerald-800 text-sm mb-2 font-heading">{item.title}</h4>
+                          <p className="text-xs text-gray-700 leading-relaxed mb-1 font-body">{item.details}</p>
+                          <p className="text-xs text-gray-700 leading-relaxed font-body">{item.description}</p>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </motion.div>
 
               {/* Quick Booking */}
               <motion.div
-                initial={{ x: -30, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <Card className="bg-green-50">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">Ready to Book?</h3>
-                    <p className="text-gray-600 mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 font-heading">Ready to Book?</h3>
+                    <p className="text-gray-600 mb-6 font-body">
                       Skip the waiting and start your booking process right away. Our team will 
                       contact you within 2 hours to finalize the details.
                     </p>
@@ -167,13 +164,14 @@ export const ContactPage = () => {
             {/* Contact Form */}
             <div>
               <motion.div
-                initial={{ x: 30, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
               >
                 <Card>
                   <CardHeader>
-                    <CardTitle>Send Us a Message</CardTitle>
+                    <CardTitle className="font-heading">Send Us a Message</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {isSubmitted ? (
@@ -186,45 +184,62 @@ export const ContactPage = () => {
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Send className="h-8 w-8 text-green-600" />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent!</h3>
-                        <p className="text-gray-600">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2 font-heading">Message Sent!</h3>
+                        <p className="text-gray-600 font-body">
                           Thank you for contacting us. We'll get back to you within 24 hours.
                         </p>
                       </motion.div>
                     ) : (
                       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Input
-                            label="Full Name *"
-                            {...register('name')}
-                            error={errors.name?.message}
-                            placeholder="John Doe"
-                          />
-                          <Input
-                            label="Email Address *"
-                            type="email"
-                            {...register('email')}
-                            error={errors.email?.message}
-                            placeholder="john@example.com"
-                          />
+                          <div className="space-y-2">
+                            <Label htmlFor="name" className="font-body">Full Name *</Label>
+                            <Input
+                              id="name"
+                              {...register('name')}
+                              placeholder="John Doe"
+                              className={errors.name ? 'border-red-500' : ''}
+                            />
+                            {errors.name && (
+                              <p className="text-sm text-red-600">{errors.name.message}</p>
+                            )}
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email" className="font-body">Email Address *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              {...register('email')}
+                              placeholder="john@example.com"
+                              className={errors.email ? 'border-red-500' : ''}
+                            />
+                            {errors.email && (
+                              <p className="text-sm text-red-600">{errors.email.message}</p>
+                            )}
+                          </div>
                         </div>
 
-                        <Input
-                          label="Subject *"
-                          {...register('subject')}
-                          error={errors.subject?.message}
-                          placeholder="Inquiry about Uganda safari packages"
-                        />
+                        <div className="space-y-2">
+                          <Label htmlFor="subject" className="font-body">Subject *</Label>
+                          <Input
+                            id="subject"
+                            {...register('subject')}
+                            placeholder="Inquiry about Uganda safari packages"
+                            className={errors.subject ? 'border-red-500' : ''}
+                          />
+                          {errors.subject && (
+                            <p className="text-sm text-red-600">{errors.subject.message}</p>
+                          )}
+                        </div>
 
-                        <div className="space-y-1">
-                          <label className="block text-sm font-medium text-gray-700">
-                            Message *
-                          </label>
-                          <textarea
+                        <div className="space-y-2">
+                          <Label htmlFor="message" className="font-body">Message *</Label>
+                          <Textarea
+                            id="message"
                             {...register('message')}
                             rows={6}
-                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Tell us about your travel plans, interests, dates, group size, budget, and any specific questions you have..."
+                            className={errors.message ? 'border-red-500' : ''}
                           />
                           {errors.message && (
                             <p className="text-sm text-red-600" role="alert">
@@ -238,7 +253,7 @@ export const ContactPage = () => {
                           Send Message
                         </Button>
 
-                        <p className="text-sm text-gray-500 text-center">
+                        <p className="text-sm text-gray-500 text-center font-body">
                           We typically respond within 24 hours during business days
                         </p>
                       </form>
@@ -256,12 +271,13 @@ export const ContactPage = () => {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-12"
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-lg text-gray-600">Quick answers to common questions</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-heading">Frequently Asked Questions</h2>
+            <p className="text-lg text-gray-600 font-body">Quick answers to common questions</p>
           </motion.div>
 
           <div className="space-y-6">
@@ -290,24 +306,18 @@ export const ContactPage = () => {
               <motion.div
                 key={index}
                 className="bg-emerald-50 p-6 rounded-lg border border-emerald-100 hover:shadow-lg transition-shadow duration-300"
-                initial={{ y: 20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <h4 className="font-semibold text-emerald-800 text-sm mb-2">{faq.q}</h4>
-                <p className="text-xs text-gray-700 leading-relaxed">{faq.a}</p>
+                <h4 className="font-semibold text-emerald-800 text-sm mb-2 font-heading">{faq.q}</h4>
+                <p className="text-xs text-gray-700 leading-relaxed font-body">{faq.a}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-
-      {/* Booking Modal */}
-      {/* <BookingModal
-        isOpen={bookingModalOpen}
-        onClose={() => setBookingModalOpen(false)}
-      /> */}
     </div>
   );
 };

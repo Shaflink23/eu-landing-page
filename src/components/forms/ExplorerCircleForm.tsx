@@ -1,5 +1,4 @@
 import * as React from "react";
-import { motion } from "framer-motion";
 import { submitFormData } from "../../utils/api";
 
 interface ExplorerCircleFormProps {
@@ -17,7 +16,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
   currentStep = 3, 
   totalSteps = 3 
 }) => {
-  const [keepUpdated, setKeepUpdated] = React.useState(true); // Email opt-in checkbox state
+  const [keepUpdated, setKeepUpdated] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -28,68 +27,49 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
     
     if (isSubmitting) return;
     
-    // Clear previous errors
     setErrorMessage(null);
-    
     setIsSubmitting(true);
 
     try {
-      // Transform the data to match the exact payload structure
+      // Simplified data transformation
+      const companion = initialData.companion;
+      const isGroup = companion === 'friends' || companion === 'family';
+      const groupSize = companion === 'couple' ? 2 : isGroup ? 4 : 1;
+
       const completeFormData = {
         name: initialData.name || "",
         email: initialData.email || "",
         phone: initialData.phone || "",
         country_of_residence: initialData.country || "Unknown",
         been_to_africa_before: initialData.beenToAfrica === 'yes',
-        travel_style: Array.isArray(initialData.travellerType) && initialData.travellerType.length > 0
-          ? initialData.travellerType.slice(0, 3) // Ensure max 3 items
-          : ["adventurer"],
+        travel_style: (initialData.travellerType || ["adventurer"]).slice(0, 3),
         dream_escape_words: initialData.dreamWords || "",
-        heard_about_us: Array.isArray(initialData.hearAbout) && initialData.hearAbout.length > 0 ? initialData.hearAbout[0] : "other",
+        heard_about_us: (initialData.hearAbout || ["other"])[0],
         feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
         travel_photo_url: initialData.photo || null,
         travel_month: initialData.startDate ? new Date(initialData.startDate).getMonth() + 1 : new Date().getMonth() + 1,
         travel_year: initialData.startDate ? new Date(initialData.startDate).getFullYear() : new Date().getFullYear(),
         preferred_start_date: initialData.startDate || null,
         preferred_end_date: initialData.endDate || null,
-        group_type: (initialData.companion === 'solo' || initialData.companion === 'couple' || initialData.companion === 'family' || initialData.companion === 'friends')
-          ? (initialData.companion === 'family' || initialData.companion === 'friends' ? 'group' : initialData.companion)
-          : "solo",
-        group_size: initialData.companion ? 
-          (initialData.companion === 'friends' || initialData.companion === 'family' 
-            ? (initialData.companionCount ? parseInt(initialData.companionCount) : 4) 
-            : initialData.companion === 'couple' ? 2 : 1) : 1,
-        must_have_experiences: Array.isArray(initialData.experiences) && initialData.experiences.length >= 3
-          ? initialData.experiences.slice(0, 3) // Take first 3, ensure exactly 3
-          : ["gorilla_trekking", "safari_conservation", "spiritual_cultural"],
+        group_type: isGroup ? 'group' : companion || 'solo',
+        group_size: groupSize,
+        must_have_experiences: (initialData.experiences || ["gorilla_trekking", "safari_conservation", "spiritual_cultural"]).slice(0, 3),
         accessibility_dietary_preferences: initialData.preferences || "None",
         send_options: "both",
-        join_early_explorer: true, // Always true for Explorer Circle
-        email_opt_in: keepUpdated // Use the checkbox state - defaults to false unless checked
+        join_early_explorer: true,
+        email_opt_in: keepUpdated
       };
 
-      // Submit to backend API
-
-      // Submit to backend API
       const result = await submitFormData(completeFormData);
 
-      console.log('📬 API Result:', result);
-
       if (result.success) {
-        console.log('🎉 Submission successful!', result.data);
-        // Store the entire API response for display (includes message, data object, etc.)
         setSubmissionData(result.data);
         setIsSubmitted(true);
       } else {
-        console.error('❌ Submission failed:', result.error);
-        const detailedError = result.error || 'Failed to submit form. Please try again.';
-        console.error('❌ Detailed error:', detailedError);
-        setErrorMessage(detailedError);
+        setErrorMessage(result.error || 'Failed to submit form. Please try again.');
       }
     } catch (error) {
-      console.error('💥 Unexpected error:', error);
       const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again or contact support.';
-      console.error('💥 Error message:', errorMsg);
       setErrorMessage(errorMsg);
     } finally {
       setIsSubmitting(false);
@@ -98,69 +78,59 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
 
   if (isSubmitted) {
     return (
-      <>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative flex flex-col items-center justify-center min-h-[400px] p-8"
-        >
-          {/* Only the main cancel button remains */}
-          <div className="mb-6">
-            <svg className="w-16 h-16 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <motion.path
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1 }}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-semibold text-green-700 mb-3">🎉 Your Uganda Adventure Awaits!</h2>
+      <div className="relative flex flex-col items-center justify-center min-h-[400px] p-8">
+        <div className="mb-6">
+          <svg className="w-16 h-16 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-semibold text-green-700 mb-3 font-heading">🎉 Your Uganda Adventure Awaits!</h2>
 
-          {submissionData && submissionData.data && (
-            <div className="text-center mb-6">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-green-800 font-medium mb-2">
-                  Reference: {submissionData.data.reference_number}
-                </p>
-                <p className="text-xs text-green-600">
-                  Estimated response time: {submissionData.data.estimated_response_time}
-                </p>
-                <p className="text-xs text-green-600">
-                  Email confirmation sent to: {initialData?.email}
-                </p>
-              </div>
-
-              <div className="text-left space-y-2">
-                <h3 className="font-semibold text-gray-800 mb-3">What's Next:</h3>
-                {submissionData.data.next_steps && submissionData.data.next_steps.map((step: string, index: number) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-white text-xs font-bold">{index + 1}</span>
-                    </div>
-                    <p className="text-sm text-gray-700">{step}</p>
-                  </div>
-                ))}
-              </div>
+        {submissionData && submissionData.data && (
+          <div className="text-center mb-6">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-green-800 font-medium mb-2 font-body">
+                Reference: {submissionData.data.reference_number}
+              </p>
+              <p className="text-xs text-green-600 font-body">
+                Estimated response time: {submissionData.data.estimated_response_time}
+              </p>
+              <p className="text-xs text-green-600 font-body">
+                Email confirmation sent to: {initialData?.email}
+              </p>
             </div>
-          )}
 
-          <div className="text-center">
-            <p className="text-base text-gray-700 mb-4">
-              {submissionData?.message || "We'll be in touch soon with your personalized journey options and a free digital guide."}
-            </p>
-            <button
-              onClick={onClose}
-              className="mt-3 px-6 py-3 rounded bg-green-500 text-white text-base font-medium shadow hover:scale-105 transition-all"
-            >
-              Close
-            </button>
+            <div className="text-left space-y-2">
+              <h3 className="font-semibold text-gray-800 mb-3 font-heading">What's Next:</h3>
+              {submissionData.data.next_steps && submissionData.data.next_steps.map((step: string, index: number) => (
+                <div key={index} className="flex items-start gap-2">
+                  <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">{index + 1}</span>
+                  </div>
+                  <p className="text-sm text-gray-700 font-body">{step}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </motion.div>
-      </>
+        )}
+
+        <div className="text-center">
+          <p className="text-base text-gray-700 mb-4 font-body">
+            {submissionData?.message || "We'll be in touch soon with your personalized journey options and a free digital guide."}
+          </p>
+          <button
+            onClick={onClose}
+            className="mt-3 px-6 py-3 rounded bg-green-500 text-white text-base font-medium hover:scale-105 transition-all font-body"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -170,51 +140,27 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>
+            <p className="text-sm font-medium text-gray-700 font-body">
               Step {currentStep} of {totalSteps}
             </p>
-            <div className="text-sm text-gray-500" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>
+            <div className="text-sm text-gray-500 font-body">
               100% Complete
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-green-500 to-emerald-600"
-              initial={{ width: 0 }}
-              animate={{ width: '100%' }}
-              transition={{ duration: 0.3 }}
-            />
+            <div className="h-full bg-gradient-to-r from-green-500 to-emerald-600 w-full" />
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-center mb-8"
-          >
-            <h2 
-              className="text-gray-900 mb-3"
-              style={{ 
-                fontSize: '32px', 
-                fontFamily: 'Roboto, sans-serif', 
-                fontWeight: 400 
-              }}
-            >
+          <div className="text-center mb-8">
+            <h2 className="text-gray-900 mb-3 text-2xl md:text-3xl font-normal font-heading">
               Explorer Circle
             </h2>
-            <p 
-              className="text-gray-600"
-              style={{ 
-                fontSize: '18px', 
-                fontFamily: 'Roboto, sans-serif', 
-                fontWeight: 400 
-              }}
-            >
+            <p className="text-gray-600 text-lg font-body">
               You're almost done! Join Our Community: Stay updated and get insider access to Uganda's top experiences, exclusive deals, and behind-the-scenes stories.
             </p>
-          </motion.div>
+          </div>
 
           <div className="flex justify-center mb-12">
             <label className="flex items-center gap-3 cursor-pointer">
@@ -224,49 +170,33 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                 onChange={() => setKeepUpdated(!keepUpdated)}
                 className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
               />
-              <span 
-                className="text-gray-700"
-                style={{ 
-                  fontSize: '16px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
-                }}
-              >
+              <span className="text-gray-700 font-body">
                 Keep me updated with the latest Uganda travel stories and offers
               </span>
             </label>
           </div>
 
           {errorMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
-            >
-              <div className="font-bold mb-2">Submission Error:</div>
-              <div className="whitespace-pre-wrap">{errorMessage}</div>
-              <div className="mt-3 text-xs text-red-600">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="font-bold mb-2 font-heading">Submission Error:</div>
+              <div className="whitespace-pre-wrap font-body">{errorMessage}</div>
+              <div className="mt-3 text-xs text-red-600 font-body">
                 Please check the browser console (F12) for more details, or contact support if the issue persists.
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Navigation Buttons */}
           <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 pt-4">
-            <motion.button
+            <button
               type="button"
               onClick={onBack}
               disabled={isSubmitting}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-body"
               style={{ 
                 height: '40px',
                 width: '130px',
-                fontSize: '14px', 
-                fontFamily: 'Roboto, sans-serif', 
-                fontWeight: 400
+                fontSize: '14px'
               }}
             >
               <svg 
@@ -286,23 +216,18 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                 />
               </svg>
               Back
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="submit"
               disabled={isSubmitting}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
               className={`rounded-lg transition-all flex items-center justify-center gap-2 ${
                 !isSubmitting
-                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:shadow-lg'
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
               style={{ 
                 height: '40px',
-                fontSize: '14px', 
-                fontFamily: 'Roboto, sans-serif', 
-                fontWeight: 400,
+                fontSize: '14px',
                 paddingLeft: '20px',
                 paddingRight: '20px'
               }}
@@ -336,7 +261,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                   </svg>
                 </>
               )}
-            </motion.button>
+            </button>
           </div>
         </form>
       </div>

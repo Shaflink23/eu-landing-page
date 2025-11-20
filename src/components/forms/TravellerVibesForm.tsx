@@ -2,6 +2,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { uploadFile } from "../../utils/api";
 import { useFormValidation, travellerVibesSchema } from "../../types";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 interface TravellerVibesFormProps {
   onNext: (data: any) => void;
@@ -252,18 +253,14 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 fontWeight: 400 
               }}
             >
-              Let's get to know your travel soul and create your perfect African adventure.
+              Let us get to know your travel soul and create your perfect African adventure.
             </p>
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name and Email Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
+              <div>
                 <label
                   className="block text-gray-700 mb-2"
                   style={{
@@ -295,13 +292,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 {getFieldError('name') && (
                   <p className="text-red-600 text-sm mt-1">{getFieldError('name')}</p>
                 )}
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              <div>
                 <label
                   className="block text-gray-700 mb-2"
                   style={{
@@ -333,15 +326,11 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 {getFieldError('email') && (
                   <p className="text-red-600 text-sm mt-1">{getFieldError('email')}</p>
                 )}
-              </motion.div>
+              </div>
             </div>
 
             {/* Phone Number */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.35 }}
-            >
+            <div>
               <label
                 className="block text-gray-700 mb-2"
                 style={{
@@ -352,42 +341,29 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
               >
                 Phone Number <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
+              <PhoneInput
                 value={formData.phone || ''}
-                onChange={(e) => setFieldValue('phone', e.target.value)}
+                onChange={(value) => setFieldValue('phone', value)}
                 onBlur={() => setFieldTouched('phone')}
-                className={`w-full px-3 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
-                  hasFieldError('phone') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
-                style={{
-                  height: '40px',
-                  fontSize: '14px',
-                  fontFamily: 'Roboto, sans-serif',
-                  fontWeight: 400,
-                  maxWidth: '270px'
-                }}
-                placeholder="+1 (555) 123-4567"
+                error={hasFieldError('phone')}
                 required
+                placeholder="Enter phone number"
+                className=" w-3/4"
               />
               {getFieldError('phone') && (
                 <p className="text-red-600 text-sm mt-1">{getFieldError('phone')}</p>
               )}
-            </motion.div>
+            </div>
 
             {/* Country and Africa Experience Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <label 
+              <div>
+                <label
                   className="block text-gray-700 mb-2"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
+                  style={{
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400
                   }}
                 >
                   Country of Residence
@@ -412,10 +388,10 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     <span className={formData.country ? 'text-gray-900' : 'text-gray-500'}>
                       {formData.country || 'Select your country'}
                     </span>
-                    <svg 
+                    <svg
                       className={`w-5 h-5 transition-transform ${isCountryDropdownOpen ? 'transform rotate-180' : ''}`}
-                      fill="none" 
-                      stroke="currentColor" 
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -424,7 +400,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
 
                   {/* Dropdown Menu */}
                   {isCountryDropdownOpen && (
-                    <div 
+                    <div
                       className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
                       style={{ maxHeight: '300px' }}
                     >
@@ -478,19 +454,15 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <label 
+              <div>
+                <label
                   className="block text-gray-700 mb-2"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
+                  style={{
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400
                   }}
                 >
                   Have you been to Africa before?
@@ -505,11 +477,11 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       onChange={(e) => setFieldValue('beenToAfrica', e.target.value)}
                       className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                     />
-                    <span 
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontFamily: 'Roboto, sans-serif',
+                        fontWeight: 400
                       }}
                     >
                       Yes
@@ -524,61 +496,54 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       onChange={(e) => setFieldValue('beenToAfrica', e.target.value)}
                       className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                     />
-                    <span 
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontFamily: 'Roboto, sans-serif',
+                        fontWeight: 400
                       }}
                     >
                       No
                     </span>
                   </label>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Traveller Type */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <label 
+            <div>
+              <label
                 className="block text-gray-700 mb-3"
-                style={{ 
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
+                style={{
+                  fontSize: '14px',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 400
                 }}
               >
                 What kind of traveller are you? (Select all that apply)
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {travellerTypes.map((type, index) => (
-                  <motion.button
+                {travellerTypes.map((type) => (
+                  <button
                     key={type.value}
                     type="button"
                     onClick={() => handleTravellerTypeToggle(type.value)}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.7 + index * 0.1 }}
-                    className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left w-full ${
+                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all text-left w-full ${
                       (formData.travellerType || []).includes(type.value)
                         ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                     }`}
-                    style={{ 
+                    style={{
                       height: '40px',
                       maxWidth: '270px'
                     }}
                   >
                     <span className="text-2xl">{type.emoji}</span>
-                    <span 
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontFamily: 'Roboto, sans-serif',
+                        fontWeight: 400
                       }}
                     >
                       {type.label}
@@ -602,52 +567,45 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                         </svg>
                       </div>
                     )}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Where did you hear about us */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <label 
+            <div>
+              <label
                 className="block text-gray-700 mb-3"
-                style={{ 
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
+                style={{
+                  fontSize: '14px',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 400
                 }}
               >
                 Where did you hear about us? (Select all that apply)
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {hearAboutOptions.map((option, index) => (
-                  <motion.button
+                {hearAboutOptions.map((option) => (
+                  <button
                     key={option.value}
                     type="button"
                     onClick={() => handleHearAboutToggle(option.value)}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.9 + index * 0.1 }}
-                    className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left w-full ${
+                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all text-left w-full ${
                       (formData.hearAbout || []).includes(option.value)
                         ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                     }`}
-                    style={{ 
+                    style={{
                       height: '40px',
                       maxWidth: '270px'
                     }}
                   >
                     <span className="text-xl">{option.emoji}</span>
-                    <span 
-                      style={{ 
-                        fontSize: '14px', 
-                        fontFamily: 'Roboto, sans-serif', 
-                        fontWeight: 400 
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontFamily: 'Roboto, sans-serif',
+                        fontWeight: 400
                       }}
                     >
                       {option.label}
@@ -671,17 +629,13 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                         </svg>
                       </div>
                     )}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Pioneer Traveller */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.0 }}
-            >
+            <div>
               <label
                 className="block text-gray-700 mb-3"
                 style={{
@@ -696,7 +650,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setFieldValue('pioneeerTraveller', 'yes')}
-                  className={`flex items-center justify-center gap-3 p-3 rounded-lg border-2 transition-all text-center flex-1 min-h-[48px] ${
+                  className={`flex items-center justify-center gap-3 p-3 rounded-lg border transition-all text-center flex-1 min-h-[48px] ${
                     formData.pioneeerTraveller === 'yes'
                       ? 'border-green-500 bg-green-50 text-green-700'
                       : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
@@ -717,7 +671,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setFieldValue('pioneeerTraveller', 'maybe')}
-                  className={`flex items-center justify-center gap-3 p-3 rounded-lg border-2 transition-all text-center flex-1 min-h-[48px] ${
+                  className={`flex items-center justify-center gap-3 p-3 rounded-lg border transition-all text-center flex-1 min-h-[48px] ${
                     formData.pioneeerTraveller === 'maybe'
                       ? 'border-green-500 bg-green-50 text-green-700'
                       : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
@@ -736,14 +690,10 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   </span>
                 </button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Upload Photo */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.1 }}
-            >
+            <div>
               <label
                 className="block text-gray-700 mb-2"
                 style={{
@@ -757,11 +707,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
 
               {/* Image Preview */}
               {uploadState.uploadedUrl && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mb-4"
-                >
+                <div className="mb-4">
                   <div className="relative inline-block">
                     <img
                       src={uploadState.uploadedUrl}
@@ -786,7 +732,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       </svg>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
 
               <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -931,7 +877,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                   </label>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Submit Button */}
             <motion.button
@@ -966,10 +912,11 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
           transition={{ delay: 0.5 }}
           className="sticky top-8 hidden md:block"
           style={{
-            width: '362px',
-            height: '372px',
-            borderRadius: '16px',
-            padding: '24px',
+            // height and width should grow proportionally based on design
+            height: '500px',
+            width: '350px',
+            borderRadius: '10px',
+            padding: '23px',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.15) 100%)',
@@ -980,7 +927,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
           <div className="flex flex-col items-center h-full">
             {/* Quote Icon Circle */}
             <div 
-              className="bg-black rounded-full flex items-center justify-center mb-6"
+              className="bg-black rounded-full p-3 flex items-center justify-center mb-6"
               style={{ width: '60px', height: '60px' }}
             >
               <svg 

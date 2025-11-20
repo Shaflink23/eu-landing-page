@@ -32,69 +32,43 @@ export const Hero = () => {
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/50" />
 
-      {/* Decorative Airplane Paths */}
-      <svg
-        className="absolute inset-0 w-full h-full opacity-20 pointer-events-none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <motion.path
-          d="M 0,100 Q 400,50 800,100"
-          stroke="white"
-          strokeWidth="1"
-          fill="none"
-          strokeDasharray="5,5"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.3 }}
-          transition={{ duration: 3, delay: 0.5 }}
-        />
-        <motion.path
-          d="M 200,300 Q 600,250 1000,300"
-          stroke="white"
-          strokeWidth="1"
-          fill="none"
-          strokeDasharray="5,5"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.3 }}
-          transition={{ duration: 3, delay: 1 }}
-        />
-      </svg>
-
       {/* Centered Content Container with extra top margin for spacing below logo */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4" style={{marginTop: '80px'}}>
-        {/* Logo Container Above Headline - Only on HomePage Hero */}
+        {/* Logo Container Above Headline */}
         <div className="flex justify-center w-full relative z-20 md:mt-[-100px] mt-[-220px] md:mb-0 mb-8 md:pb-[40px] pb-[20px]">
-              <a 
-                href="/" 
-                className="cursor-pointer block"
-                aria-label="Go to Homepage"
-              >
-                <div
-                  className="flex items-center justify-center backdrop-blur-md hover:scale-105 transition-transform duration-300"
-                  style={{
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '50%',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                    overflow: 'hidden',
-                    border: '2px solid rgba(255,255,255,0.4)',
-                    background: 'rgba(255,255,255,0.18)',
-                    WebkitBackdropFilter: 'blur(6px)',
-                    backdropFilter: 'blur(6px)',
-                  }}
-                >
-                  <img
-                    src="/images/Logo/E_Ug-3.png"
-                    alt="Everything Uganda Logo"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      borderRadius: '50%',
-                    }}
-                  />
-                </div>
-              </a>
+          <a 
+            href="/" 
+            className="cursor-pointer block"
+            aria-label="Go to Homepage"
+          >
+            <div
+              className="flex items-center justify-center backdrop-blur-md hover:scale-105 transition-transform duration-300"
+              style={{
+                width: '100px',
+                height: '100px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '2px solid rgba(255,255,255,0.4)',
+                background: 'rgba(255,255,255,0.18)',
+                WebkitBackdropFilter: 'blur(6px)',
+                backdropFilter: 'blur(6px)',
+              }}
+            >
+              <img
+                src="/images/Logo/E_Ug-3.png"
+                alt="Everything Uganda Logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  borderRadius: '50%',
+                }}
+              />
             </div>
+          </a>
+        </div>
+
+        {/* Main Content */}
         <motion.div
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,9 +81,8 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-3xl md:text-7xl font-bold text-white mb-3 md:mb-4 leading-tight"
+            className="text-3xl md:text-7xl font-bold text-white mb-3 md:mb-4 leading-tight font-heading"
             style={{
-              textShadow: '2px 4px 8px rgba(0,0,0,0.7)',
               letterSpacing: '-0.02em',
               marginTop: '-20px'
             }}
@@ -126,8 +99,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
-            className="text-base md:text-2xl text-gray-100 mb-4 md:mb-8 font-light"
-            style={{ textShadow: '1px 2px 4px rgba(0,0,0,0.6)' }}
+            className="text-base md:text-2xl text-gray-100 mb-4 md:mb-8 font-light font-body"
           >
             Where every journey tells a story and you are part of it.
           </motion.p>
@@ -139,7 +111,7 @@ export const Hero = () => {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="bg-black/40 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-4 md:px-8 md:py-6 mb-6 md:mb-10 mx-auto max-w-2xl"
           >
-            <p className="text-sm md:text-xl text-white font-light italic leading-relaxed">
+            <p className="text-sm md:text-xl text-white font-light italic leading-relaxed font-body">
               "This is not just another trip to Africa.
               <br />
               <span className="text-green-300 font-medium">
@@ -149,7 +121,7 @@ export const Hero = () => {
             </p>
           </motion.div>
 
-          {/* Journey Button - smaller size */}
+          {/* Journey Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

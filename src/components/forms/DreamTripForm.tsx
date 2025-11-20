@@ -328,11 +328,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
            </motion.div>
 
             {/* Dream Experiences */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
+            <div>
               <div className="flex items-center justify-between mb-3">
                 <label 
                   className="block text-gray-700"
@@ -362,76 +358,68 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
 
                   return (
                     <div key={exp.value} className="relative">
-                      <motion.button
+                      <button
                         type="button"
                         onClick={() => canSelect && handleExperienceToggle(exp.value)}
                         onMouseEnter={() => setHoveredExperience(exp.value)}
                         onMouseLeave={() => setHoveredExperience(null)}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
                         disabled={!canSelect}
-                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                        className={`flex items-center gap-3 p-3 rounded-lg border transition-all text-left ${
                           isSelected
                             ? 'border-green-500 bg-green-50 text-green-700'
                             : canSelect
                             ? 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                             : 'border-gray-200 opacity-50 cursor-not-allowed'
                         }`}
-                        style={{ 
-                          width: '270px', 
+                        style={{
+                          width: '270px',
                           height: '40px'
                         }}
                       >
                         <span style={{ fontSize: '16px' }}>{exp.emoji}</span>
-                        <span 
-                          style={{ 
-                            fontSize: '14px', 
-                            fontFamily: 'Roboto, sans-serif', 
-                            fontWeight: 400 
+                        <span
+                          style={{
+                            fontSize: '14px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 400
                           }}
                         >
                           {exp.label}
                         </span>
                         {isSelected && (
                           <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                            <svg 
-                              width="14" 
-                              height="14" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path 
-                                d="M20 6L9 17L4 12" 
-                                stroke="white" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
+                              <path
+                                d="M20 6L9 17L4 12"
+                                stroke="white"
+                                strokeWidth="2"
+                                strokeLinecap="round"
                                 strokeLinejoin="round"
                               />
                             </svg>
                           </div>
                         )}
-                      </motion.button>
+                      </button>
                       
                       {/* Hover Tooltip */}
                       {hoveredExperience === exp.value && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute z-50 mt-2 p-4 rounded-lg shadow-xl border border-gray-200 w-80"
-                          style={{ 
+                        <div className="absolute z-50 mt-2 p-4 rounded-lg shadow-xl border border-gray-200 w-80"
+                          style={{
                             fontFamily: 'Roboto, sans-serif',
                             backgroundColor: '#e6f8ee'
                           }}
                         >
                           <div className="flex items-start gap-3 mb-2">
                             <span style={{ fontSize: '24px' }}>{exp.emoji}</span>
-                            <h4 
+                            <h4
                               className="font-semibold text-gray-900"
-                              style={{ 
+                              style={{
                                 fontSize: '14px',
                                 fontWeight: 500
                               }}
@@ -439,9 +427,9 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                               {exp.label}
                             </h4>
                           </div>
-                          <p 
+                          <p
                             className="text-gray-600 leading-relaxed"
-                            style={{ 
+                            style={{
                               fontSize: '13px',
                               fontWeight: 400,
                               lineHeight: '1.6'
@@ -449,111 +437,97 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                           >
                             {exp.description}
                           </p>
-                        </motion.div>
+                        </div>
                       )}
                     </div>
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
 
             {/* Who's coming with you */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
+            <div>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg 
-                    width="14" 
-                    height="14" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path 
-                      d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
-                      stroke="white" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
+                    <path
+                      d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    <path 
-                      d="M12 14C16.4183 14 20 17.5817 20 22H4C4 17.5817 7.58172 14 12 14Z" 
-                      stroke="white" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
+                    <path
+                      d="M12 14C16.4183 14 20 17.5817 20 22H4C4 17.5817 7.58172 14 12 14Z"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </svg>
                 </div>
-                <label 
+                <label
                   className="text-gray-700"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
+                  style={{
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400
                   }}
                 >
                   Who's coming with you?
                 </label>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {companionOptions.map((option, index) => (
+                {companionOptions.map((option) => (
                   <div key={option.value} className="flex flex-col items-center">
-                    <motion.button
+                    <button
                       type="button"
                       onClick={() => setFieldValue('companion', option.value)}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.6 + index * 0.1 }}
-                      className={`flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all w-full ${
+                      className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all w-full ${
                         formData.companion === option.value
                           ? 'border-green-500 bg-green-50 text-green-700'
                           : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
                       }`}
-                      style={{ 
-                        maxWidth: '128px', 
+                      style={{
+                        maxWidth: '128px',
                         height: '96px',
                         margin: '0 auto'
                       }}
                     >
                       <span style={{ fontSize: '24px' }} className="mb-1">{option.emoji}</span>
                       <div className="text-center">
-                        <span 
+                        <span
                           className="block font-medium"
-                          style={{ 
-                            fontSize: '13px', 
-                            fontFamily: 'Roboto, sans-serif', 
-                            fontWeight: 500 
+                          style={{
+                            fontSize: '13px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 500
                           }}
                         >
                           {option.label}
                         </span>
-                        <span 
+                        <span
                           className="text-gray-500 text-xs leading-tight"
-                          style={{ 
-                            fontSize: '11px', 
-                            fontFamily: 'Roboto, sans-serif', 
-                            fontWeight: 400 
+                          style={{
+                            fontSize: '11px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 400
                           }}
                         >
                           {option.subtitle}
                         </span>
                       </div>
-                    </motion.button>
+                    </button>
                     
                     {/* Number Input for Friends or Family */}
                     {formData.companion === option.value && (option.value === 'friends' || option.value === 'family') && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="mt-2 w-full"
-                        style={{ maxWidth: '128px' }}
-                      >
+                      <div className="mt-2 w-full" style={{ maxWidth: '128px' }}>
                         <input
                           type="number"
                           min="2"
@@ -568,22 +542,22 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                             height: '32px'
                           }}
                         />
-                        <p 
+                        <p
                           className="text-gray-500 text-center mt-1"
-                          style={{ 
-                            fontSize: '10px', 
-                            fontFamily: 'Roboto, sans-serif', 
-                            fontWeight: 400 
+                          style={{
+                            fontSize: '10px',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: 400
                           }}
                         >
                           How many?
                         </p>
-                      </motion.div>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Dream Description */}
             <motion.div

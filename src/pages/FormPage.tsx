@@ -65,7 +65,7 @@ export const FormPage = () => {
       {/* Form Content */}
       <div className="flex-1 py-8 md:py-12 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10">
+          <div className="bg-white rounded-2xl shadow-sm p-6 md:p-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
