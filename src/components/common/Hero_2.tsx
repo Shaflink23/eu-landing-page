@@ -4,7 +4,7 @@ import { JourneyButton } from '../JourneyButton';
 
 export const Hero_2 = () => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  const videoSrc = "/video/newest eu vid.mp4";
+  const videoSrc = "/video/uganda video.mp4";
 
   React.useEffect(() => {
     if (videoRef.current) {
@@ -46,8 +46,8 @@ export const Hero_2 = () => {
                     alt="Everything Uganda Logo"
                     className="hover:scale-105 transition-transform duration-300"
                     style={{
-                      width: '100px',
-                      height: '100px',
+                      width: '150px',
+                      height: '150px',
                       objectFit: 'contain',
                     }}
                   />
@@ -57,7 +57,7 @@ export const Hero_2 = () => {
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
-          className="text-center max-w-5xl md:mt-[-10px] mt-[60px]"
+          className="text-center max-w-5xl md:mt-[-60px] mt-[60px]"
           style={{ marginBottom: '0px', paddingTop: '0px' }}
         >
           {/* Main Headline */}
