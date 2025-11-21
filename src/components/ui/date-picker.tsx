@@ -38,6 +38,9 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
+  // Set defaultMonth to minDate if no value is selected and minDate is provided
+  const defaultMonth = !value && minDate ? minDate : undefined
+
   return (
     <div className="space-y-2">
       {label && (
@@ -64,6 +67,7 @@ export function DatePicker({
           <Calendar
             mode="single"
             selected={value}
+            defaultMonth={defaultMonth}
             onSelect={(date) => {
               onChange?.(date)
               setOpen(false)
@@ -113,6 +117,9 @@ export function FormDatePicker({
 }: FormDatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
+  // Set defaultMonth to minDate if no value is selected and minDate is provided
+  const defaultMonth = !field.value && minDate ? minDate : undefined
+
   return (
     <div className="space-y-2">
       {label && (
@@ -139,6 +146,7 @@ export function FormDatePicker({
           <Calendar
             mode="single"
             selected={field.value}
+            defaultMonth={defaultMonth}
             onSelect={(date) => {
               field.onChange(date)
               setOpen(false)

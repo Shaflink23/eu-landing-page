@@ -47,7 +47,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
 
   const form = useForm<DreamTripFormData>({
     resolver: zodResolver(dreamTripSchema),
-    mode: 'onSubmit', // Match TravellerVibesForm validation mode
+    mode: 'onChange', // Real-time validation for better UX
     defaultValues: {
       preferred_start_date: initialData.preferred_start_date || initialData.startDate || '',
       preferred_end_date: initialData.preferred_end_date || initialData.endDate || '',
@@ -59,18 +59,26 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
       group_type: (['solo', 'couple', 'group'].includes(initialData.group_type || initialData.companion)
         ? (initialData.group_type || initialData.companion)
         : 'solo') as "solo" | "couple" | "group",
-      group_size: parseInt(initialData.group_size || initialData.companionCount || '3') || 3,
+      group_size: parseInt(initialData.group_size || initialData.companionCount || '1') || 1, // Default to 1 for solo
       dream_escape_words: initialData.dream_escape_words || initialData.dreamWords || '',
     },
   });
 
   // Convert string dates to Date objects for FormDatePicker and back to strings for form submission
   const getDateFromString = (dateString: string) => {
-    return dateString ? new Date(dateString) : undefined;
+    if (!dateString) return undefined;
+    // Ensure we create a date at midnight to avoid timezone issues
+    const date = new Date(dateString + 'T00:00:00');
+    return isNaN(date.getTime()) ? undefined : date;
   };
 
   const getStringFromDate = (date: Date | undefined) => {
-    return date ? date.toISOString().split('T')[0] : '';
+    if (!date) return '';
+    // Format as YYYY-MM-DD
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const selectedExperiences = form.watch('must_have_experiences') || [];
@@ -80,17 +88,46 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     const today = new Date();
     const minDate = new Date(today);
     minDate.setDate(today.getDate() + 20);
-    return minDate.toISOString().split('T')[0];
+    return minDate;
+  };
+  
+  // Calculate minimum end date (day after start date or 20 days from today, whichever is later)
+  const getMinEndDate = () => {
+    const startDateString = form.getValues('preferred_start_date');
+    if (startDateString) {
+      const startDate = getDateFromString(startDateString);
+      if (startDate) {
+        const minEndDate = new Date(startDate);
+        minEndDate.setDate(startDate.getDate() + 1); // Day after start date
+        return minEndDate;
+      }
+    }
+    return getMinDate(); // Default to 20 days from today
+  };
+  
+  const getMinDateString = () => {
+    const minDate = getMinDate();
+    const year = minDate.getFullYear();
+    const month = String(minDate.getMonth() + 1).padStart(2, '0');
+    const day = String(minDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const formatDateRange = () => {
-    if (!form.getValues('preferred_start_date')) return '';
-    if (!form.getValues('preferred_end_date')) {
-      return new Date(form.getValues('preferred_start_date')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const startDate = form.getValues('preferred_start_date');
+    const endDate = form.getValues('preferred_end_date');
+    
+    if (!startDate) return '';
+    
+    const start = getDateFromString(startDate);
+    if (!start) return '';
+    
+    if (!endDate) {
+      return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    const start = new Date(form.getValues('preferred_start_date'));
-    const end = new Date(form.getValues('preferred_end_date'));
+    const end = getDateFromString(endDate);
+    if (!end) return '';
 
     return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   };
@@ -203,12 +240,30 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   // Form validation monitoring (matching TravellerVibesForm pattern)
   React.useEffect(() => {
     // Monitor form validation state for debugging
-    if (Object.keys(form.formState.errors).length > 0) {
-      //console.log('Form validation errors:', form.formState.errors);
-    }
-  }, [form.formState.isValid, form.formState.errors]);
+    console.log('🔍 DreamTripForm validation state:', {
+      isValid: form.formState.isValid,
+      errors: form.formState.errors,
+      touchedFields: form.formState.touchedFields,
+      dirtyFields: form.formState.dirtyFields,
+      values: form.getValues(),
+      groupType: form.getValues('group_type'),
+      groupSize: form.getValues('group_size')
+    });
+  }, [form.formState.isValid, form.formState.errors, form.formState.touchedFields]);
 
   function onSubmit(data: DreamTripFormData) {
+    // Debug logging for form submission
+    console.log('🚀 DreamTripForm onSubmit called with data:', data);
+    console.log('Form is valid:', form.formState.isValid);
+    console.log('Form errors:', form.formState.errors);
+    
+    // Ensure we have all required data before proceeding
+    if (!data.preferred_start_date || !data.preferred_end_date || !data.must_have_experiences?.length) {
+      console.log('❌ Missing required fields');
+      return;
+    }
+    
+    console.log('✅ Form validation passed, proceeding to next step');
     // Form submission handled automatically - matches TravellerVibesForm pattern
     onNext(data);
   }
@@ -283,7 +338,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                                         }
                                       }}
                                       placeholder="Select start date"
-                                      minDate={new Date(getMinDate())}
+                                      minDate={getMinDate()}
                                       className="w-full"
                                     />
                                   </FormControl>
@@ -317,7 +372,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                                         }
                                       }}
                                       placeholder="Select end date"
-                                      minDate={getDateFromString(form.getValues('preferred_start_date')) || new Date(getMinDate())}
+                                      minDate={getMinEndDate()}
                                       className="w-full"
                                     />
                                   </FormControl>
@@ -349,9 +404,9 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                         render={() => (
                           <FormItem>
                             <div className="flex items-center justify-between mb-3">
-                              <FormLabel>Select Your Top 3 Dream Experiences (Choose any 3) </FormLabel>
-                              <span className="text-green-600 font-semibold text-sm">
-                                {selectedExperiences.length}/3 selected
+                              <FormLabel>Select Your Top 3 Dream Experiences (Choose exactly 3) </FormLabel>
+                              <span className={`font-semibold text-sm ${selectedExperiences.length === 3 ? 'text-green-600' : 'text-orange-600'}`}>
+                                {selectedExperiences.length}/3 selected {selectedExperiences.length === 3 ? '✓' : '(required)'}
                               </span>
                             </div>
                             <FormDescription>
@@ -546,9 +601,15 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                                       onClick={() => {
                                         field.onChange(option.value);
                                         // Clear group size when switching away from group
-                                        if (option.value !== 'group') {
-                                          form.setValue('group_size', option.value === 'solo' ? 1 : 2);
+                                        if (option.value === 'solo') {
+                                          form.setValue('group_size', 1);
+                                        } else if (option.value === 'couple') {
+                                          form.setValue('group_size', 2);
+                                        } else {
+                                          form.setValue('group_size', 3);
                                         }
+                                        // Trigger validation immediately after group type change
+                                        form.trigger(['group_type', 'group_size']);
                                       }}
                                       className={`flex flex-col items-center justify-center p-3 md:p-2 h-20 md:h-24 w-full border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500 ${
                                         field.value === option.value
@@ -632,17 +693,29 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
 
                       {/* Navigation Buttons */}
                       <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={onBack}
-                          className="h-12 md:h-10 w-32 border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500 text-sm md:text-xs"
-                        >
-                          ← Previous
-                        </Button>
+                        <div className="space-y-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onBack}
+                            className="h-12 md:h-10 w-32 border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500 text-sm md:text-xs"
+                          >
+                            ← Previous
+                          </Button>
+                          {/* Debug validation status */}
+                          {process.env.NODE_ENV === 'development' && (
+                            <div className="text-xs text-gray-500">
+                              Valid: {form.formState.isValid ? '✅' : '❌'} |
+                              Experiences: {selectedExperiences.length}/3 |
+                              Start: {form.getValues('preferred_start_date') ? '✅' : '❌'} |
+                              End: {form.getValues('preferred_end_date') ? '✅' : '❌'}
+                            </div>
+                          )}
+                        </div>
                         <Button
                           type="submit"
-                          className="h-12 md:h-10 w-32 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700 text-sm md:text-xs font-medium"
+                          disabled={!form.formState.isValid || selectedExperiences.length < 3}
+                          className="h-12 md:h-10 w-32 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700 text-sm md:text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Next Step →
                         </Button>

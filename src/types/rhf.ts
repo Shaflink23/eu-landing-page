@@ -52,8 +52,8 @@ export const dreamTripSchema = z.object({
     'homestays_villages',
     'birdlife_explorations'
   ]))
-    .min(1, 'Please select at least one experience')
-    .max(3, 'Please select no more than 3 experiences'),
+    .min(3, 'Please select exactly 3 dream experiences')
+    .max(3, 'Please select exactly 3 experiences'),
 
   group_type: z.enum(['solo', 'couple', 'group']),
 

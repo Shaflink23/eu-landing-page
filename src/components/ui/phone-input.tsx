@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/input-group";
 
 // Country data with flags and calling codes
-const COUNTRIES = [
+const COUNTRIES = [ 
   // Popular countries first
   { code: "US", name: "United States", flag: "🇺🇸", dialCode: "+1" },
   { code: "GB", name: "United Kingdom", flag: "🇬🇧", dialCode: "+44" },
@@ -164,7 +164,7 @@ const COUNTRIES = [
 interface PhoneInputProps {
   value?: string;
   onChange?: (value: string) => void;
-  onBlur?: () => void;
+  onBlur?: (e?: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
   className?: string;
   error?: boolean;
@@ -202,10 +202,46 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       }
     };
 
+    // Track focus state to prevent unnecessary state sync
+    const [isSearchInputFocused, setIsSearchInputFocused] = React.useState(false);
+    const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+    // Restore focus to search input when it loses focus during typing
+    React.useEffect(() => {
+      if (isSearchInputFocused && isOpen && searchInputRef.current) {
+        // Check focus every 50ms - less aggressive but still responsive
+        const intervalId = setInterval(() => {
+          if (isSearchInputFocused && isOpen && document.activeElement !== searchInputRef.current) {
+            searchInputRef.current?.focus();
+          }
+        }, 50);
+
+        return () => {
+          clearInterval(intervalId);
+        };
+      }
+    }, [isSearchInputFocused, isOpen]);
+
+
+
+
+
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Store cursor position before the change
+      const cursorPosition = e.target.selectionStart;
       const newPhoneNumber = e.target.value.replace(/[^\d]/g, ""); // Only digits
       const newValue = selectedCountry.dialCode + newPhoneNumber;
+
+      // Call parent onChange and let it handle the state update
       onChange?.(newValue);
+
+      // Restore cursor position to maintain user experience
+      requestAnimationFrame(() => {
+        const input = e.target as HTMLInputElement;
+        if (input && cursorPosition !== null && document.activeElement === input) {
+          input.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      });
     };
 
     // Filter countries based on search term
@@ -257,10 +293,35 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="Search countries..."
                     value={searchTerm}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      e.stopPropagation();
+                    }}
+                    onKeyDown={(e) => {
+                      // Allow all text input and navigation keys
+                      if (
+                        e.key.length === 1 || // Single character (text input)
+                        e.key === 'Backspace' ||
+                        e.key === 'Delete' ||
+                        e.key === 'ArrowLeft' ||
+                        e.key === 'ArrowRight' ||
+                        e.key === 'Home' ||
+                        e.key === 'End'
+                      ) {
+                        e.stopPropagation(); // Don't let Select handle navigation
+                      }
+                    }}
+                    onFocus={(e) => {
+                      setIsSearchInputFocused(true);
+                      e.stopPropagation();
+                    }}
+                    onBlur={(e) => {
+                      e.stopPropagation();
+                    }}
                     className="pl-10 pr-8 rounded-md border-gray-300 focus:ring-green-500 focus:border-green-500"
                     style={{
                       fontSize: '14px',
