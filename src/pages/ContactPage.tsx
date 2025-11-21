@@ -113,7 +113,7 @@ export const ContactPage = () => {
               >
                 <h2 className="text-3xl font-bold text-gray-900 mb-6 font-heading">Let us Start Planning</h2>
                 <p className="text-lg text-gray-600 mb-8 font-body">
-                  Whether you're interested in gorilla trekking, cultural experiences, or luxury safaris, 
+                  Whether you are interested in gorilla trekking, cultural experiences, or luxury safaris, 
                   our team of Uganda experts is ready to help you plan the perfect adventure.
                 </p>
 

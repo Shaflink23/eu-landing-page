@@ -272,7 +272,7 @@ export const travellerVibesSchema = z.object({
     .min(1, 'Please select at least one traveller type')
     .max(3, 'Please select no more than 3 traveller types'),
 
-  hearAbout: z.array(z.string())
+  hearAbout: z.string()
     .min(1, 'Please select how you heard about us'),
 
   pioneeerTraveller: z.enum(['yes', 'maybe'], {

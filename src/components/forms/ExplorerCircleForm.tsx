@@ -1,5 +1,30 @@
+"use client"
+
 import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
 import { submitFormData } from "../../utils/api";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ExplorerCircleFormProps {
   onBack: () => void;
@@ -9,22 +34,30 @@ interface ExplorerCircleFormProps {
   totalSteps?: number;
 }
 
-export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({ 
+export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
   onBack, 
   initialData, 
   onClose, 
   currentStep = 3, 
   totalSteps = 3 
 }) => {
-  const [keepUpdated, setKeepUpdated] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [submissionData, setSubmissionData] = React.useState<any>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const explorerCircleSchema = z.object({
+    keepUpdated: z.boolean().default(true),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(explorerCircleSchema),
+    defaultValues: {
+      keepUpdated: true,
+    },
+  });
+
+  const handleSubmit = async (data: z.infer<typeof explorerCircleSchema>) => {
     if (isSubmitting) return;
     
     setErrorMessage(null);
@@ -44,7 +77,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         been_to_africa_before: initialData.beenToAfrica === 'yes',
         travel_style: (initialData.travellerType || ["adventurer"]).slice(0, 3),
         dream_escape_words: initialData.dreamWords || "",
-        heard_about_us: (initialData.hearAbout || ["other"])[0],
+        heard_about_us: initialData.hearAbout || 'other',
         feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
         travel_photo_url: initialData.photo || null,
         travel_month: initialData.startDate ? new Date(initialData.startDate).getMonth() + 1 : new Date().getMonth() + 1,
@@ -57,7 +90,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         accessibility_dietary_preferences: initialData.preferences || "None",
         send_options: "both",
         join_early_explorer: true,
-        email_opt_in: keepUpdated
+        email_opt_in: data.keepUpdated
       };
 
       const result = await submitFormData(completeFormData);
@@ -65,12 +98,15 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
       if (result.success) {
         setSubmissionData(result.data);
         setIsSubmitted(true);
+        toast.success("Form submitted successfully!");
       } else {
         setErrorMessage(result.error || 'Failed to submit form. Please try again.');
+        toast.error('Form submission failed');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again or contact support.';
       setErrorMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,30 +125,30 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
             />
           </svg>
         </div>
-        <h2 className="text-2xl font-semibold text-green-700 mb-3 font-heading">🎉 Your Uganda Adventure Awaits!</h2>
+        <h2 className="text-2xl font-semibold text-green-700 mb-3">🎉 Your Uganda Adventure Awaits!</h2>
 
         {submissionData && submissionData.data && (
           <div className="text-center mb-6">
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-green-800 font-medium mb-2 font-body">
+              <p className="text-sm text-green-800 font-medium mb-2">
                 Reference: {submissionData.data.reference_number}
               </p>
-              <p className="text-xs text-green-600 font-body">
+              <p className="text-xs text-green-600">
                 Estimated response time: {submissionData.data.estimated_response_time}
               </p>
-              <p className="text-xs text-green-600 font-body">
+              <p className="text-xs text-green-600">
                 Email confirmation sent to: {initialData?.email}
               </p>
             </div>
 
             <div className="text-left space-y-2">
-              <h3 className="font-semibold text-gray-800 mb-3 font-heading">What's Next:</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">What's Next:</h3>
               {submissionData.data.next_steps && submissionData.data.next_steps.map((step: string, index: number) => (
                 <div key={index} className="flex items-start gap-2">
                   <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-white text-xs font-bold">{index + 1}</span>
                   </div>
-                  <p className="text-sm text-gray-700 font-body">{step}</p>
+                  <p className="text-sm text-gray-700">{step}</p>
                 </div>
               ))}
             </div>
@@ -120,15 +156,15 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
         )}
 
         <div className="text-center">
-          <p className="text-base text-gray-700 mb-4 font-body">
-            {submissionData?.message || "We'll be in touch soon with your personalized journey options and a free digital guide."}
+          <p className="text-base text-gray-700 mb-4">
+            {submissionData?.message || "We will be in touch soon with your personalized journey options and a free digital guide."}
           </p>
-          <button
+          <Button
             onClick={onClose}
-            className="mt-3 px-6 py-3 rounded bg-green-500 text-white text-base font-medium hover:scale-105 transition-all font-body"
+            className="mt-3 px-6 py-3 rounded bg-green-500 text-white text-base font-medium hover:scale-105 transition-all"
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -136,135 +172,99 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-0">
-      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
-        {/* Progress Bar */}
-        <div className="mb-6">
+      <Card>
+        <CardHeader>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700 font-body">
+            <CardTitle className="text-sm font-medium">
               Step {currentStep} of {totalSteps}
-            </p>
-            <div className="text-sm text-gray-500 font-body">
+            </CardTitle>
+            <div className="text-sm text-gray-500">
               100% Complete
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             <div className="h-full bg-gradient-to-r from-green-500 to-emerald-600 w-full" />
           </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="text-center mb-8">
-            <h2 className="text-gray-900 mb-3 text-2xl md:text-3xl font-normal font-heading">
-              Explorer Circle
-            </h2>
-            <p className="text-gray-600 text-lg font-body">
-              You're almost done! Join Our Community: Stay updated and get insider access to Uganda's top experiences, exclusive deals, and behind-the-scenes stories.
-            </p>
-          </div>
-
-          <div className="flex justify-center mb-12">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={keepUpdated}
-                onChange={() => setKeepUpdated(!keepUpdated)}
-                className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
-              />
-              <span className="text-gray-700 font-body">
-                Keep me updated with the latest Uganda travel stories and offers
-              </span>
-            </label>
-          </div>
-
-          {errorMessage && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              <div className="font-bold mb-2 font-heading">Submission Error:</div>
-              <div className="whitespace-pre-wrap font-body">{errorMessage}</div>
-              <div className="mt-3 text-xs text-red-600 font-body">
-                Please check the browser console (F12) for more details, or contact support if the issue persists.
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+              <div className="text-center mb-8">
+                <CardTitle className="text-2xl md:text-3xl mb-3">
+                  Explorer Circle
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  You are almost done! Join Our Community: Stay updated and get insider access to Uganda's top experiences, exclusive deals, and behind-the-scenes stories.
+                </CardDescription>
               </div>
-            </div>
-          )}
 
-          {/* Navigation Buttons */}
-          <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 pt-4">
-            <button
-              type="button"
-              onClick={onBack}
-              disabled={isSubmitting}
-              className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-body"
-              style={{ 
-                height: '40px',
-                width: '130px',
-                fontSize: '14px'
-              }}
-            >
-              <svg 
-                width="16" 
-                height="16" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-gray-600"
-              >
-                <path 
-                  d="M19 12H5M12 19L5 12L12 5" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
+              <div className="flex justify-center mb-12">
+                <FormField
+                  control={form.control}
+                  name="keepUpdated"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Keep me updated with the latest Uganda travel stories and offers
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
                 />
-              </svg>
-              Back
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`rounded-lg transition-all flex items-center justify-center gap-2 ${
-                !isSubmitting
-                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-              style={{ 
-                height: '40px',
-                fontSize: '14px',
-                paddingLeft: '20px',
-                paddingRight: '20px'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  Submit & Get My Guide
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="text-white"
-                  >
-                    <path 
-                      d="M5 12H19M12 5L19 12L12 19" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </>
+              </div>
+
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  <div className="font-bold mb-2 text-red-800">Submission Error:</div>
+                  <div className="whitespace-pre-wrap text-red-700">{errorMessage}</div>
+                  <div className="mt-3 text-xs text-red-600">
+                    Please check the browser console (F12) for more details, or contact support if the issue persists.
+                  </div>
+                </div>
               )}
-            </button>
-          </div>
-        </form>
-      </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onBack}
+                    disabled={isSubmitting}
+                    className="h-10 w-32 border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500"
+                  >
+                    ← Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-10 px-6 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Submit & Get My Guide →
+                      </>
+                    )}
+                  </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

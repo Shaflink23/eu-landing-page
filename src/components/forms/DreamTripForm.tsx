@@ -1,6 +1,29 @@
+"use client"
+
 import * as React from "react";
-import { motion } from "framer-motion";
-import { useFormValidation, dreamTripSchema } from "../../types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { dreamTripSchema, DreamTripFormData } from "@/types/rhf";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface DreamTripFormProps {
   onNext: (data: any) => void;
@@ -19,18 +42,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   totalSteps = 3,
   onClose
 }) => {
-  // Initialize form validation with Zod
-  const {
-    data: formData,
-    setFieldValue
-  } = useFormValidation(dreamTripSchema, {
-    startDate: initialData.startDate || '',
-    endDate: initialData.endDate || '',
-    experiences: initialData.experiences || [],
-    companion: initialData.companion || '',
-    companionCount: initialData.companionCount || '',
-    dreamWords: initialData.dreamWords || '',
-  });
+  const [hoveredExperience, setHoveredExperience] = React.useState<string | null>(null);
 
   // Calculate minimum date (20 days from today)
   const getMinDate = () => {
@@ -41,115 +53,73 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   };
 
   const formatDateRange = () => {
-    if (!formData.startDate) return '';
-    if (!formData.endDate) return new Date(formData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (!form.getValues('startDate')) return '';
+    if (!form.getValues('endDate')) {
+      return new Date(form.getValues('startDate')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
 
-    const start = new Date(formData.startDate);
-    const end = new Date(formData.endDate);
+    const start = new Date(form.getValues('startDate'));
+    const end = new Date(form.getValues('endDate'));
 
     return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   };
-
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const startDate = e.target.value;
-    setFieldValue('startDate', startDate);
-
-    // If end date exists and is before new start date, clear it
-    if (formData.endDate && new Date(formData.endDate) <= new Date(startDate)) {
-      setFieldValue('endDate', '');
-    }
-  };
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const endDate = e.target.value;
-    setFieldValue('endDate', endDate);
-  };
-
-  const [hoveredExperience, setHoveredExperience] = React.useState<string | null>(null);
 
   const experiences = [
     { 
       value: 'gorilla_trekking', 
       label: 'Wildlife, Safari & Forest Expeditions', 
       emoji: '🦍', 
-      color: 'from-green-500 to-emerald-600',
       description: "Track gorillas through misty jungles, spot lions and elephants at sunrise, and unwind in eco-lodges deep in Uganda's ancient wilderness."
     },
     { 
       value: 'homestays_villages', 
       label: 'Culture, Villages & Local Living', 
       emoji: '🏡', 
-      color: 'from-orange-500 to-amber-600',
       description: "Cook with grandmothers, learn ancestral weaving, and share fireside stories in villages where culture, kindness, and heritage thrive."
     },
     { 
       value: 'nile_adventure', 
       label: 'Nile Adventures & Island Escapes ', 
       emoji: '🛶', 
-      color: 'from-blue-500 to-cyan-600',
       description: "Follow the Nile to its source — raft raging rapids, kayak past lush shores, then drift to serene islands and lakeside glampsites kissed by sunset."
     },
     { 
       value: 'food_nightlife', 
       label: 'Flavours, Coffee & Night Life', 
       emoji: '🍛', 
-      color: 'from-red-500 to-pink-600',
       description: "Taste Uganda's creative spirit — from street food and skyline cocktails to highland coffee farms and artisan markets buzzing with life."
     },
     { 
       value: 'safari_conservation', 
       label: 'Safari & Conservation Trails', 
       emoji: '🦓', 
-      color: 'from-yellow-500 to-orange-600',
       description: "Walk alongside rangers and conservationists, witness endangered species in protected habitats, and contribute to wildlife preservation that safeguards Africa's future."
     },
     { 
       value: 'spiritual_cultural', 
       label: 'Wellness, Rhythm & Renewal', 
       emoji: '🕯️', 
-      color: 'from-purple-500 to-indigo-600',
       description: "Breathe in the hills, stretch with sunrise yoga, dance barefoot at drum circles, and find peace where joy and nature flow as one."
     },
     { 
       value: 'community_weaving', 
       label: 'Local Artisan Markets & Weaving', 
       emoji: '🧵', 
-      color: 'from-amber-600 to-yellow-600',
       description: "Discover vibrant markets where skilled artisans craft baskets, textiles, and jewelry — each piece woven with tradition, passion, and centuries-old technique."
     },
     { 
       value: 'birdlife_explorations', 
       label: 'Birdlife & Wildlife Explorations', 
       emoji: '🐦', 
-      color: 'from-pink-500 to-rose-600',
       description: "Journey through wetlands and forests teeming with over 1,000 bird species — from the rare Shoebill to colorful sunbirds painting the canopy with song."
     },
     { 
       value: 'lakeside_luxe', 
       label: 'Luxe Horizons & Hidden Retreats ', 
       emoji: '🏖️', 
-      color: 'from-cyan-500 to-blue-600',
       description: "Soar over savannas and islands to private lodges and spas. Every stay blends first-class comfort with wild landscapes and quiet indulgence."
     },
   ];
-
-  const handleExperienceToggle = (experience: string) => {
-    const current = formData.experiences || [];
-    if (current.includes(experience)) {
-      setFieldValue('experiences', current.filter((e: string) => e !== experience));
-    } else if (current.length < 3) {
-      setFieldValue('experiences', [...current, experience]);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onNext(formData);
-  };
-
-  // Validation check
-
-  const isFormValid = formData.startDate && formData.endDate && (formData.experiences?.length === 3);
 
   const companionOptions = [
     { value: 'solo', label: 'Solo', subtitle: 'Just me', emoji: '👤' },
@@ -158,549 +128,323 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
     { value: 'family', label: 'Family', subtitle: 'Specify number', emoji: '👩‍👧‍👦' },
   ];
 
+  const form = useForm<DreamTripFormData>({
+    resolver: zodResolver(dreamTripSchema),
+    defaultValues: {
+      startDate: initialData.startDate || '',
+      endDate: initialData.endDate || '',
+      experiences: initialData.experiences || [],
+      companion: initialData.companion || '',
+      companionCount: initialData.companionCount || '',
+      dreamWords: initialData.dreamWords || '',
+    },
+  });
+
+  const selectedExperiences = form.watch('experiences') || [];
+  const selectedCompanion = form.watch('companion');
+
+  const handleExperienceToggle = (experience: string) => {
+    const current = selectedExperiences;
+    const newExperiences = current.includes(experience)
+      ? current.filter((e: string) => e !== experience)
+      : current.length < 3
+      ? [...current, experience]
+      : current;
+    
+    form.setValue('experiences', newExperiences);
+  };
+
+  function onSubmit(data: DreamTripFormData) {
+    onNext(data);
+  }
+
   return (
     <div className="grid md:grid-cols-3 gap-6 px-4 md:px-0">
       {/* Main Form Container */}
       <div className="md:col-span-2">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mx-auto max-w-2xl md:max-w-none">
-          {/* Progress Bar */}
-          <div className="mb-6">
+        <Card className="max-w-2xl md:max-w-none">
+          <CardHeader>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-gray-700" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>
+              <CardTitle className="text-sm font-medium">
                 Step {currentStep} of {totalSteps}
-              </p>
+              </CardTitle>
               {onClose && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={onClose}
-                  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                  style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}
+                  className="text-sm text-gray-500 hover:text-gray-700"
                 >
                   Cancel & Return Home
-                </button>
+                </Button>
               )}
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-green-500 to-emerald-600"
-                initial={{ width: 0 }}
-                animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
-                transition={{ duration: 0.3 }}
+              <div
+                className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-300"
+                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               />
             </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h2 
-              className="text-gray-900 mb-2"
-              style={{ 
-                fontSize: '24px', 
-                fontFamily: 'Roboto, sans-serif', 
-                fontWeight: 400 
-              }}
-            >
-              Now, let us build your perfect Ugandan escape.
-            </h2>
-            {/* <p 
-              className="text-gray-600 mb-6"
-              style={{ 
-                fontSize: '16px', 
-                fontFamily: 'Roboto, sans-serif', 
-                fontWeight: 400 
-              }}
-            >
-              Now, let us build your perfect Ugandan escape.
-            </p> */}
-          </motion.div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-           {/* Date Range Selection */}
-           <motion.div
-             initial={{ opacity: 0, x: -20 }}
-             animate={{ opacity: 1, x: 0 }}
-             transition={{ delay: 0.2 }}
-           >
-             <label
-               className="block text-gray-700 mb-4"
-               style={{
-                 fontSize: '14px',
-                 fontFamily: 'Roboto, sans-serif',
-                 fontWeight: 400
-               }}
-             >
-               When are you planning to travel? *
-             </label>
-
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               {/* Start Date */}
-               <div>
-                 <label
-                   className="block text-gray-600 mb-2 text-sm"
-                   style={{
-                     fontSize: '12px',
-                     fontFamily: 'Roboto, sans-serif',
-                     fontWeight: 400
-                   }}
-                 >
-                   Start Date
-                 </label>
-                 <input
-                   type="date"
-                   value={formData.startDate || ''}
-                   onChange={handleStartDateChange}
-                   min={getMinDate()}
-                   className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                   style={{
-                     height: '40px',
-                     fontSize: '14px',
-                     fontFamily: 'Roboto, sans-serif',
-                     fontWeight: 400
-                   }}
-                   required
-                 />
-               </div>
-
-               {/* End Date */}
-               <div>
-                 <label
-                   className="block text-gray-600 mb-2 text-sm"
-                   style={{
-                     fontSize: '12px',
-                     fontFamily: 'Roboto, sans-serif',
-                     fontWeight: 400
-                   }}
-                 >
-                   End Date
-                 </label>
-                 <input
-                   type="date"
-                   value={formData.endDate || ''}
-                   onChange={handleEndDateChange}
-                   min={formData.startDate || getMinDate()}
-                   className="w-full px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                   style={{
-                     height: '40px',
-                     fontSize: '14px',
-                     fontFamily: 'Roboto, sans-serif',
-                     fontWeight: 400
-                   }}
-                   required
-                 />
-               </div>
-             </div>
-
-             {/* Date Range Display */}
-             {formData.startDate && formData.endDate && (
-               <motion.div
-                 initial={{ opacity: 0, y: -10 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
-               >
-                 <p
-                   className="font-medium text-green-800 text-center"
-                   style={{
-                     fontSize: '14px',
-                     fontFamily: 'Roboto, sans-serif',
-                     fontWeight: 400
-                   }}
-                 >
-                   🗓️ Your trip: {formatDateRange()}
-                 </p>
-               </motion.div>
-             )}
-
-             {/* Helper Text */}
-             <div className="mt-2">
-               <p
-                 className="text-gray-600"
-                 style={{
-                   fontSize: '12px',
-                   fontFamily: 'Roboto, sans-serif',
-                   fontWeight: 400
-                 }}
-               >
-                 💡 Select your preferred start and end dates for the Uganda adventure
-               </p>
-             </div>
-           </motion.div>
-
-            {/* Dream Experiences */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label 
-                  className="block text-gray-700"
-                  style={{ 
-                    fontSize: '14px', 
-                    fontFamily: 'Roboto, sans-serif', 
-                    fontWeight: 400 
-                  }}
-                >
-                  Select Your Top 3 Dream Experiences (Choose exactly 3)
-                </label>
-                <span
-                  className="text-green-600 font-semibold"
-                  style={{
-                    fontSize: '14px',
-                    fontFamily: 'Roboto, sans-serif',
-                    fontWeight: 400
-                  }}
-                >
-                  {(formData.experiences?.length || 0)}/3 selected
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {experiences.map((exp, index) => {
-                  const isSelected = (formData.experiences || []).includes(exp.value);
-                  const canSelect = (formData.experiences || []).length < 3 || isSelected;
-
-                  return (
-                    <div key={exp.value} className="relative">
-                      <button
-                        type="button"
-                        onClick={() => canSelect && handleExperienceToggle(exp.value)}
-                        onMouseEnter={() => setHoveredExperience(exp.value)}
-                        onMouseLeave={() => setHoveredExperience(null)}
-                        disabled={!canSelect}
-                        className={`flex items-center gap-3 p-3 rounded-lg border transition-all text-left ${
-                          isSelected
-                            ? 'border-green-500 bg-green-50 text-green-700'
-                            : canSelect
-                            ? 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
-                            : 'border-gray-200 opacity-50 cursor-not-allowed'
-                        }`}
-                        style={{
-                          width: '270px',
-                          height: '40px'
-                        }}
-                      >
-                        <span style={{ fontSize: '16px' }}>{exp.emoji}</span>
-                        <span
-                          style={{
-                            fontSize: '14px',
-                            fontFamily: 'Roboto, sans-serif',
-                            fontWeight: 400
-                          }}
-                        >
-                          {exp.label}
-                        </span>
-                        {isSelected && (
-                          <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                            <svg
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M20 6L9 17L4 12"
-                                stroke="white"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        )}
-                      </button>
-                      
-                      {/* Hover Tooltip */}
-                      {hoveredExperience === exp.value && (
-                        <div className="absolute z-50 mt-2 p-4 rounded-lg shadow-xl border border-gray-200 w-80"
-                          style={{
-                            fontFamily: 'Roboto, sans-serif',
-                            backgroundColor: '#e6f8ee'
-                          }}
-                        >
-                          <div className="flex items-start gap-3 mb-2">
-                            <span style={{ fontSize: '24px' }}>{exp.emoji}</span>
-                            <h4
-                              className="font-semibold text-gray-900"
-                              style={{
-                                fontSize: '14px',
-                                fontWeight: 500
-                              }}
-                            >
-                              {exp.label}
-                            </h4>
-                          </div>
-                          <p
-                            className="text-gray-600 leading-relaxed"
-                            style={{
-                              fontSize: '13px',
-                              fontWeight: 400,
-                              lineHeight: '1.6'
-                            }}
-                          >
-                            {exp.description}
-                          </p>
-                        </div>
+            <CardTitle className="text-2xl">Now, let us build your perfect Ugandan escape.</CardTitle>
+            <CardDescription>
+              Customize your dream adventure with the experiences and companions that matter most to you.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Date Range Selection */}
+                <div>
+                  <label className="text-sm font-medium">When are you planning to travel? *</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <FormField
+                      control={form.control}
+                      name="startDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Start Date</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              {...field}
+                              min={getMinDate()}
+                              className="h-10"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                    />
 
-            {/* Who's coming with you */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <FormField
+                      control={form.control}
+                      name="endDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">End Date</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              {...field}
+                              min={form.getValues('startDate') || getMinDate()}
+                              className="h-10"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    <path
-                      d="M12 14C16.4183 14 20 17.5817 20 22H4C4 17.5817 7.58172 14 12 14Z"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <label
-                  className="text-gray-700"
-                  style={{
-                    fontSize: '14px',
-                    fontFamily: 'Roboto, sans-serif',
-                    fontWeight: 400
-                  }}
-                >
-                  Who's coming with you?
-                </label>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {companionOptions.map((option) => (
-                  <div key={option.value} className="flex flex-col items-center">
-                    <button
-                      type="button"
-                      onClick={() => setFieldValue('companion', option.value)}
-                      className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all w-full ${
-                        formData.companion === option.value
-                          ? 'border-green-500 bg-green-50 text-green-700'
-                          : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
-                      }`}
-                      style={{
-                        maxWidth: '128px',
-                        height: '96px',
-                        margin: '0 auto'
-                      }}
-                    >
-                      <span style={{ fontSize: '24px' }} className="mb-1">{option.emoji}</span>
-                      <div className="text-center">
-                        <span
-                          className="block font-medium"
-                          style={{
-                            fontSize: '13px',
-                            fontFamily: 'Roboto, sans-serif',
-                            fontWeight: 500
-                          }}
-                        >
-                          {option.label}
-                        </span>
-                        <span
-                          className="text-gray-500 text-xs leading-tight"
-                          style={{
-                            fontSize: '11px',
-                            fontFamily: 'Roboto, sans-serif',
-                            fontWeight: 400
-                          }}
-                        >
-                          {option.subtitle}
-                        </span>
-                      </div>
-                    </button>
-                    
-                    {/* Number Input for Friends or Family */}
-                    {formData.companion === option.value && (option.value === 'friends' || option.value === 'family') && (
-                      <div className="mt-2 w-full" style={{ maxWidth: '128px' }}>
-                        <input
-                          type="number"
-                          min="2"
-                          value={formData.companionCount || ''}
-                          onChange={(e) => setFieldValue('companionCount', e.target.value)}
-                          placeholder="Number"
-                          className="w-full px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-center"
-                          style={{
-                            fontSize: '12px',
-                            fontFamily: 'Roboto, sans-serif',
-                            fontWeight: 400,
-                            height: '32px'
-                          }}
-                        />
-                        <p
-                          className="text-gray-500 text-center mt-1"
-                          style={{
-                            fontSize: '10px',
-                            fontFamily: 'Roboto, sans-serif',
-                            fontWeight: 400
-                          }}
-                        >
-                          How many?
-                        </p>
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Dream Description */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <label 
-                className="block text-gray-700 mb-2"
-                style={{ 
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
-                }}
-              >
-                Describe your dream Ugandan escape in three words (Optional)
-              </label>
-              <input
-                type="text"
-                value={formData.dreamWords}
-                onChange={(e) => setFieldValue('dreamWords', e.target.value)}
-                className="px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                style={{ 
-                  width: '270px', 
-                  height: '40px',
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
-                }}
-                placeholder="e.g., Adventure, Connection, Discovery"
-                maxLength={100}
-              />
-              <p 
-                className="text-gray-600 mt-1"
-                style={{ 
-                  fontSize: '12px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400 
-                }}
-              >
-                💭 Don't overthink it – let your heart speak
-              </p>
-            </motion.div>
+                  {/* Date Range Display */}
+                  {form.getValues('startDate') && form.getValues('endDate') && (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="font-medium text-green-800 text-center text-sm">
+                        🗓️ Your trip: {formatDateRange()}
+                      </p>
+                    </div>
+                  )}
 
-            {/* Navigation Buttons */}
-            <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 pt-4">
-              <motion.button
-                type="button"
-                onClick={onBack}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all rounded-lg flex items-center justify-center gap-2"
-                style={{ 
-                  height: '40px',
-                  width: '130px',
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400
-                }}
-              >
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-gray-600"
-                >
-                  <path 
-                    d="M19 12H5M12 19L5 12L12 5" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Previous
-              </motion.button>
-              <motion.button
-                type="submit"
-                disabled={!isFormValid}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
-                className={`rounded-lg transition-all flex items-center justify-center gap-2 ${
-                  isFormValid
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                style={{ 
-                  height: '40px',
-                  width: '130px',
-                  fontSize: '14px', 
-                  fontFamily: 'Roboto, sans-serif', 
-                  fontWeight: 400
-                }}
-              >
-                Next Step
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={isFormValid ? 'text-white' : 'text-gray-400'}
-                >
-                  <path 
-                    d="M5 12H19M12 5L19 12L12 19" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </motion.button>
-            </div>
-          </form>
-        </div>
+                  <p className="text-gray-600 text-xs mt-2">
+                    💡 Select your preferred start and end dates for the Uganda adventure
+                  </p>
+                </div>
+
+                {/* Dream Experiences */}
+                <FormField
+                  control={form.control}
+                  name="experiences"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between mb-3">
+                        <FormLabel>Select Your Top 3 Dream Experiences (Choose exactly 3)</FormLabel>
+                        <span className="text-green-600 font-semibold text-sm">
+                          {selectedExperiences.length}/3 selected
+                        </span>
+                      </div>
+                      <FormControl>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {experiences.map((exp, index) => {
+                            const isSelected = selectedExperiences.includes(exp.value);
+                            const canSelect = selectedExperiences.length < 3 || isSelected;
+
+                            return (
+                              <div key={exp.value} className="relative">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => canSelect && handleExperienceToggle(exp.value)}
+                                  onMouseEnter={() => setHoveredExperience(exp.value)}
+                                  onMouseLeave={() => setHoveredExperience(null)}
+                                  disabled={!canSelect}
+                                  className={`flex items-center gap-3 p-3 h-10 max-w-[270px] border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500 ${
+                                    isSelected
+                                      ? 'border-green-500 bg-green-50 text-green-700'
+                                      : canSelect
+                                      ? 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
+                                      : 'border-gray-200 opacity-50 cursor-not-allowed'
+                                  }`}
+                                >
+                                  <span className="text-sm">{exp.emoji}</span>
+                                  <span className="text-sm truncate">{exp.label}</span>
+                                  {isSelected && (
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      className="ml-auto"
+                                    >
+                                      <path
+                                        d="M20 6L9 17L4 12"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  )}
+                                </Button>
+                                
+                                {/* Hover Tooltip */}
+                                {hoveredExperience === exp.value && (
+                                  <div className="absolute z-50 mt-2 p-4 rounded-lg shadow-xl border border-gray-200 w-80 bg-white">
+                                    <div className="flex items-start gap-3 mb-2">
+                                      <span className="text-xl">{exp.emoji}</span>
+                                      <h4 className="font-semibold text-gray-900 text-sm">{exp.label}</h4>
+                                    </div>
+                                    <p className="text-gray-600 text-xs leading-relaxed">{exp.description}</p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Companion Selection */}
+                <FormField
+                  control={form.control}
+                  name="companion"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Who's coming with you?</FormLabel>
+                      <FormControl>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {companionOptions.map((option) => (
+                            <div key={option.value} className="flex flex-col items-center">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => field.onChange(option.value)}
+                                className={`flex flex-col items-center justify-center p-2 h-24 w-full border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500 ${
+                                  field.value === option.value
+                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                    : 'border-gray-300 hover:border-green-300 hover:bg-gray-50'
+                                }`}
+                              >
+                                <span className="text-xl mb-1">{option.emoji}</span>
+                                <div className="text-center">
+                                  <span className="block font-medium text-xs">{option.label}</span>
+                                  <span className="text-gray-500 text-xs">{option.subtitle}</span>
+                                </div>
+                              </Button>
+                              
+                              {/* Number Input for Friends or Family */}
+                              {field.value === option.value && (option.value === 'friends' || option.value === 'family') && (
+                                <div className="mt-2 w-full">
+                                  <Input
+                                    type="number"
+                                    min="2"
+                                    max="20"
+                                    step="1"
+                                    value={form.getValues('companionCount') || ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      // Only accept positive numbers, remove any non-numeric characters
+                                      if (value === '' || /^\d+$/.test(value)) {
+                                        form.setValue('companionCount', value);
+                                      }
+                                    }}
+                                    placeholder="Number"
+                                    className="h-8 text-xs text-center"
+                                  />
+                                  <p className="text-gray-500 text-center mt-1 text-xs">How many?</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Dream Description */}
+                <FormField
+                  control={form.control}
+                  name="dreamWords"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Describe your dream Ugandan escape in three words (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field}
+                          placeholder="e.g., Adventure, Connection, Discovery"
+                          className="max-w-[270px] h-10"
+                          maxLength={100}
+                        />
+                      </FormControl>
+                      <p className="text-gray-600 text-xs mt-1">
+                        💭 Don't overthink it – let your heart speak
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Navigation Buttons */}
+                <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onBack}
+                    className="h-10 w-32 border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500"
+                  >
+                    ← Previous
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="h-10 w-32 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+                    disabled={!form.formState.isValid}
+                  >
+                    Next Step →
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Testimonial Card */}
       <div className="md:col-span-1">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-          className="sticky top-8 bg-gradient-to-br from-amber-50 to-orange-50 p-2 rounded-2xl border border-amber-200 min-h-[200px] flex flex-col justify-center text-xs hidden md:flex"
-        >
-          <div className="text-4xl mb-4">💡</div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+        <Card className="sticky top-8 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 min-h-[200px] flex flex-col justify-center text-xs hidden md:block">
+          <CardContent className="text-center p-6">
+            <div className="text-4xl mb-4">🌿</div>
             <p className="text-lg text-gray-800 italic mb-4 leading-relaxed">
               "It's like Uganda handpicked me back."
             </p>
-            <p className="text-sm text-gray-600 font-semibold">
+            <p className="text-sm text-green-700 font-semibold">
               Ethan, Bristol
             </p>
-          </motion.div>
-        </motion.div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

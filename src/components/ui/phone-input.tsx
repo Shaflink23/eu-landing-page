@@ -168,82 +168,168 @@ interface PhoneInputProps {
   label?: string;
 }
 
-export function PhoneInput({
-  value = "",
-  onChange,
-  onBlur,
-  placeholder = "Enter phone number",
-  className,
-  error = false,
-  disabled = false,
-  required = false,
-  label
-}: PhoneInputProps) {
-  const [selectedCountry, setSelectedCountry] = React.useState(
-    COUNTRIES.find(country => value.startsWith(country.dialCode)) || COUNTRIES[0]
-  );
-  const [phoneNumber, setPhoneNumber] = React.useState(
-    value ? value.replace(selectedCountry?.dialCode || "", "") : ""
-  );
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [isOpen, setIsOpen] = React.useState(false);
+export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
+  ({ value = "", onChange, onBlur, placeholder = "Enter phone number", className, error = false, disabled = false, required = false, label }, ref) => {
+    const [selectedCountry, setSelectedCountry] = React.useState(
+      COUNTRIES.find(country => value.startsWith(country.dialCode)) || COUNTRIES[0]
+    );
+    const [phoneNumber, setPhoneNumber] = React.useState(
+      value ? value.replace(selectedCountry?.dialCode || "", "") : ""
+    );
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const [isOpen, setIsOpen] = React.useState(false);
 
-  // Update when external value changes
-  React.useEffect(() => {
-    if (value) {
-      const country = COUNTRIES.find(c => value.startsWith(c.dialCode));
+    // Update when external value changes
+    React.useEffect(() => {
+      if (value) {
+        const country = COUNTRIES.find(c => value.startsWith(c.dialCode));
+        if (country) {
+          setSelectedCountry(country);
+          setPhoneNumber(value.replace(country.dialCode, ""));
+        }
+      }
+    }, [value]);
+
+    const handleCountryChange = (countryCode: string) => {
+      const country = COUNTRIES.find(c => c.code === countryCode);
       if (country) {
         setSelectedCountry(country);
-        setPhoneNumber(value.replace(country.dialCode, ""));
+        setIsOpen(false);
+        setSearchTerm("");
+        const newValue = country.dialCode + phoneNumber;
+        onChange?.(newValue);
       }
-    }
-  }, [value]);
+    };
 
-  const handleCountryChange = (countryCode: string) => {
-    const country = COUNTRIES.find(c => c.code === countryCode);
-    if (country) {
-      setSelectedCountry(country);
-      setIsOpen(false);
-      setSearchTerm("");
-      const newValue = country.dialCode + phoneNumber;
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newPhoneNumber = e.target.value.replace(/[^\d]/g, ""); // Only digits
+      setPhoneNumber(newPhoneNumber);
+      const newValue = selectedCountry.dialCode + newPhoneNumber;
       onChange?.(newValue);
-    }
-  };
+    };
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPhoneNumber = e.target.value.replace(/[^\d]/g, ""); // Only digits
-    setPhoneNumber(newPhoneNumber);
-    const newValue = selectedCountry.dialCode + newPhoneNumber;
-    onChange?.(newValue);
-  };
+    // Filter countries based on search term
+    const filteredCountries = React.useMemo(() => {
+      if (!searchTerm) return COUNTRIES;
+      return COUNTRIES.filter(country =>
+        country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        country.dialCode.includes(searchTerm) ||
+        country.code.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }, [searchTerm]);
 
-  // Filter countries based on search term
-  const filteredCountries = React.useMemo(() => {
-    if (!searchTerm) return COUNTRIES;
-    return COUNTRIES.filter(country =>
-      country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      country.dialCode.includes(searchTerm) ||
-      country.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+    const clearSearch = () => {
+      setSearchTerm("");
+    };
 
-  const clearSearch = () => {
-    setSearchTerm("");
-  };
+    return (
+      <div className={cn("w-full", className)}>
+        <div className="flex gap-2 w-full">
+          <Select
+            value={selectedCountry.code}
+            onValueChange={handleCountryChange}
+            disabled={disabled}
+            open={isOpen}
+            onOpenChange={setIsOpen}
+          >
+            <SelectTrigger
+              className={cn(
+                "w-[120px] shrink-0 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all",
+                error && "border-red-500 bg-red-50"
+              )}
+              style={{
+                height: '40px',
+                fontSize: '14px',
+                fontFamily: 'Roboto, sans-serif',
+                fontWeight: 400
+              }}
+            >
+              <SelectValue>
+                <div className="flex items-center gap-1">
+                  <span className="text-lg">{selectedCountry.flag}</span>
+                  <span className="text-sm font-medium">{selectedCountry.dialCode}</span>
+                </div>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="w-[320px]">
+              {/* Search Input */}
+              <div className="p-3 border-b bg-gray-50">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search countries..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-8 rounded-md border-gray-300 focus:ring-green-500 focus:border-green-500"
+                    style={{
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, sans-serif',
+                      height: '36px'
+                    }}
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Country List */}
+              <div className="max-h-60 overflow-y-auto py-1">
+                {filteredCountries.length > 0 ? (
+                  filteredCountries.map((country) => (
+                    <SelectItem key={country.code} value={country.code} className="py-2">
+                      <div className="flex items-center gap-3 w-full">
+                        <span className="text-lg">{country.flag}</span>
+                        <span
+                          className="text-sm font-medium flex-1"
+                          style={{
+                            fontFamily: 'Roboto, sans-serif'
+                          }}
+                        >
+                          {country.name}
+                        </span>
+                        <span
+                          className="text-sm text-gray-500"
+                          style={{
+                            fontFamily: 'Roboto, sans-serif'
+                          }}
+                        >
+                          {country.dialCode}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div
+                    className="p-3 text-center text-sm text-gray-500"
+                    style={{
+                      fontFamily: 'Roboto, sans-serif'
+                    }}
+                  >
+                    No countries found
+                  </div>
+                )}
+              </div>
+            </SelectContent>
+          </Select>
 
-  return (
-    <div className={cn("w-full", className)}>
-      <div className="flex gap-2 w-full">
-        <Select
-          value={selectedCountry.code}
-          onValueChange={handleCountryChange}
-          disabled={disabled}
-          open={isOpen}
-          onOpenChange={setIsOpen}
-        >
-          <SelectTrigger
+          <input
+            ref={ref}
+            type="tel"
+            value={phoneNumber}
+            onChange={handlePhoneChange}
+            onBlur={onBlur}
+            placeholder={placeholder}
+            disabled={disabled}
+            required={required}
             className={cn(
-              "w-[120px] shrink-0 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all",
+              "flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-red-500 bg-red-50"
             )}
             style={{
@@ -252,102 +338,11 @@ export function PhoneInput({
               fontFamily: 'Roboto, sans-serif',
               fontWeight: 400
             }}
-          >
-            <SelectValue>
-              <div className="flex items-center gap-1">
-                <span className="text-lg">{selectedCountry.flag}</span>
-                <span className="text-sm font-medium">{selectedCountry.dialCode}</span>
-              </div>
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent className="w-[320px]">
-            {/* Search Input */}
-            <div className="p-3 border-b bg-gray-50">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  type="text"
-                  placeholder="Search countries..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-8 rounded-md border-gray-300 focus:ring-green-500 focus:border-green-500"
-                  style={{
-                    fontSize: '14px',
-                    fontFamily: 'Roboto, sans-serif',
-                    height: '36px'
-                  }}
-                />
-                {searchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            {/* Country List */}
-            <div className="max-h-60 overflow-y-auto py-1">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map((country) => (
-                  <SelectItem key={country.code} value={country.code} className="py-2">
-                    <div className="flex items-center gap-3 w-full">
-                      <span className="text-lg">{country.flag}</span>
-                      <span
-                        className="text-sm font-medium flex-1"
-                        style={{
-                          fontFamily: 'Roboto, sans-serif'
-                        }}
-                      >
-                        {country.name}
-                      </span>
-                      <span
-                        className="text-sm text-gray-500"
-                        style={{
-                          fontFamily: 'Roboto, sans-serif'
-                        }}
-                      >
-                        {country.dialCode}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))
-              ) : (
-                <div
-                  className="p-3 text-center text-sm text-gray-500"
-                  style={{
-                    fontFamily: 'Roboto, sans-serif'
-                  }}
-                >
-                  No countries found
-                </div>
-              )}
-            </div>
-          </SelectContent>
-        </Select>
-
-        <input
-          type="tel"
-          value={phoneNumber}
-          onChange={handlePhoneChange}
-          onBlur={onBlur}
-          placeholder={placeholder}
-          disabled={disabled}
-          required={required}
-          className={cn(
-            "flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-red-500 bg-red-50"
-          )}
-          style={{
-            height: '40px',
-            fontSize: '14px',
-            fontFamily: 'Roboto, sans-serif',
-            fontWeight: 400
-          }}
-        />
+          />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+PhoneInput.displayName = "PhoneInput";

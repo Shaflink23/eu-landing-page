@@ -4,7 +4,7 @@ import { JourneyButton } from '../JourneyButton';
 
 export const Hero_2 = () => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  const videoSrc = "/video/uganda video.mp4";
+  const videoSrc = "/videos/newest eu vid.mp4";
 
   React.useEffect(() => {
     if (videoRef.current) {
