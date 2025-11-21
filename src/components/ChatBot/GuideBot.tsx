@@ -102,7 +102,7 @@ const GuideBot = () => {
     
     setTimeout(() => {
       simulateTyping(() => {
-        addMessage("Hello, Welcome to Everything Uganda.\n\nI'm Nambi, your virtual assistant. I can help you with common travel questions about Uganda.\n\nSelect a question to get started:", true);
+        addMessage("Hello, Welcome to Everything Uganda.\n\nI'm Nambi, your FAQ assistant. I can help you with common travel questions about Uganda.\n\nSelect a question to get started:", true);
         setCurrentStep('faq-selection');
       }, 1000);
     }, 500);
@@ -174,7 +174,7 @@ const GuideBot = () => {
     if (!isOpen && messages.length === 0) {
       setTimeout(() => {
         simulateTyping(() => {
-          addMessage("Hello, Welcome to Everything Uganda.\n\nI'm Nambi, your virtual assistant. I can help you with common travel questions about Uganda.\n\nSelect a question to get started:", true);
+          addMessage("Hello, Welcome to Everything Uganda.\n\nI'm Nambi, your FAQ assistant. I can help you with common travel questions about Uganda.\n\nSelect a question to get started:", true);
           setCurrentStep('faq-selection');
         }, 1000);
       }, 500);

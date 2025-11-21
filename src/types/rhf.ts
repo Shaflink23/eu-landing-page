@@ -1,7 +1,7 @@
-// React Hook Form Types
+// React Hook Form Types - Aligned with Backend API Format
 import { z } from 'zod';
 
-// Schema for TravellerVibesForm - matches the actual form fields
+// Schema for TravellerVibesForm - aligns with API field names
 export const travellerVibesSchema = z.object({
   name: z.string()
     .min(1, 'Name is required')
@@ -12,83 +12,96 @@ export const travellerVibesSchema = z.object({
     .email('Please enter a valid email address')
     .max(255, 'Email must be less than 255 characters'),
 
-  phone: z.string().optional(),
+  phone: z.string()
+    .min(1, 'Phone number is required'),
 
-  country: z.string().optional(),
+  country_of_residence: z.string()
+    .min(1, 'Please select your country of residence'),
 
-  beenToAfrica: z.enum(['yes', 'no']).optional(),
+  been_to_africa_before: z.boolean().optional(),
 
-  travellerType: z.array(z.string())
+  travel_style: z.array(z.enum(['adventurer', 'cultural_immerser', 'luxe_relaxer', 'off_the_grid', 'mix_of_all']))
     .min(1, 'Please select at least one traveller type')
-    .max(5, 'Please select no more than 5 traveller types'),
+    .max(3, 'Please select no more than 3 traveller types'),
 
-  hearAbout: z.string().optional(),
+  heard_about_us: z.enum(['tiktok', 'instagram', 'word_of_mouth', 'uk_travel_group', 'event_expo', 'other']).optional(),
 
-  pioneeerTraveller: z.enum(['yes', 'maybe']).optional(),
+  feature_as_pioneer: z.enum(['yes', 'maybe_later']).optional(),
 
-  photo: z.string().optional()
-}).refine((data) => {
-  // Ensure at least name, email, and one traveller type are provided
-  return data.name.trim() !== '' &&
-         data.email.trim() !== '' &&
-         data.travellerType &&
-         data.travellerType.length > 0;
-}, {
-  message: 'Please fill in all required fields',
-  path: ['name'] // Focus error on first required field
+  travel_photo_url: z.union([z.string().url('Photo URL must be valid'), z.literal('')]).optional()
 });
 
-// Schema for DreamTripForm
+// Schema for DreamTripForm - aligns with API field names
 export const dreamTripSchema = z.object({
-  startDate: z.string()
+  preferred_start_date: z.string()
     .min(1, 'Please select a start date')
-    .refine((date) => {
-      const selectedDate = new Date(date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
-      const minDate = new Date(today);
-      minDate.setDate(today.getDate() + 20); // 20 days from today
-      return selectedDate >= minDate;
-    }, 'Start date must be at least 20 days from today'),
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid start date'),
 
-  endDate: z.string()
+  preferred_end_date: z.string()
     .min(1, 'Please select an end date')
-    .refine((endDate) => {
-      const end = new Date(endDate);
-      return end instanceof Date && !isNaN(end.getTime());
-    }, 'Please select a valid end date'),
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid end date'),
 
-  experiences: z.array(z.string())
-    .min(3, 'Please select exactly 3 experiences')
-    .max(3, 'Please select exactly 3 experiences'),
+  must_have_experiences: z.array(z.enum([
+    'gorilla_trekking',
+    'community_weaving',
+    'lakeside_luxe',
+    'food_nightlife',
+    'spiritual_cultural',
+    'safari_conservation',
+    'nile_adventure',
+    'homestays_villages',
+    'birdlife_explorations'
+  ]))
+    .min(1, 'Please select at least one experience')
+    .max(3, 'Please select no more than 3 experiences'),
 
-  companion: z.string()
-    .min(1, 'Please select your travel companion'),
+  group_type: z.enum(['solo', 'couple', 'group']),
 
-  companionCount: z.string()
-    .optional()
-    .refine((val) => {
-      if (!val) return true;
-      const num = parseInt(val);
-      return !isNaN(num) && num >= 2;
-    }, 'Please enter a valid number'),
+  group_size: z.number()
+    .min(1, 'Please enter your group size')
+    .max(50, 'Group size must be between 1 and 50 people'),
 
-  dreamWords: z.string()
+  dream_escape_words: z.string()
     .max(100, 'Description must be less than 100 characters')
     .optional()
 }).refine((data) => {
   // Cross-field validation: end date must be after start date
-  if (data.startDate && data.endDate) {
-    const start = new Date(data.startDate);
-    const end = new Date(data.endDate);
+  if (data.preferred_start_date && data.preferred_end_date) {
+    const start = new Date(data.preferred_start_date);
+    const end = new Date(data.preferred_end_date);
     return end > start;
   }
   return true;
 }, {
   message: 'End date must be after start date',
-  path: ['endDate']
+  path: ['preferred_end_date']
+}).refine((data) => {
+  // Group type and size validation
+  if (data.group_type === 'solo' && data.group_size !== 1) {
+    return false;
+  }
+  if (data.group_type === 'couple' && data.group_size < 2) {
+    return false;
+  }
+  if (data.group_type === 'group' && data.group_size < 3) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Group size must match group type requirements',
+  path: ['group_size']
+});
+
+// Schema for ExplorerCircleForm - aligns with API field names
+export const explorerCircleSchema = z.object({
+  send_options: z.enum(['bespoke_packages', 'sneak_peek', 'both']),
+  accessibility_dietary_preferences: z.string().optional(),
+  join_early_explorer: z.boolean().default(true),
+  email_opt_in: z.boolean().default(true),
+  keepUpdated: z.boolean().optional() // For backwards compatibility
 });
 
 // Export types for use in components
 export type TravellerVibesFormData = z.infer<typeof travellerVibesSchema>;
 export type DreamTripFormData = z.infer<typeof dreamTripSchema>;
+export type ExplorerCircleFormData = z.infer<typeof explorerCircleSchema>;

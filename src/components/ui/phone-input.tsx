@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 // Country data with flags and calling codes
 const COUNTRIES = [
@@ -164,36 +169,32 @@ interface PhoneInputProps {
   className?: string;
   error?: boolean;
   disabled?: boolean;
-  required?: boolean;
   label?: string;
 }
 
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value = "", onChange, onBlur, placeholder = "Enter phone number", className, error = false, disabled = false, required = false }, ref) => {
-    const [selectedCountry, setSelectedCountry] = React.useState(
-      COUNTRIES.find(country => value.startsWith(country.dialCode)) || COUNTRIES[0]
-    );
-    const [phoneNumber, setPhoneNumber] = React.useState(
-      value ? value.replace(selectedCountry?.dialCode || "", "") : ""
-    );
+  ({ value = "", onChange, onBlur, placeholder = "Enter phone number", className, error = false, disabled = false }, ref) => {
+    // Derive country and phone number from the value prop
+    const [selectedCountry, phoneNumber] = React.useMemo(() => {
+      if (!value) return [COUNTRIES[0], ""];
+
+      // Find country that matches the value prefix
+      const country = COUNTRIES.find(c => value.startsWith(c.dialCode));
+      if (country) {
+        const number = value.replace(country.dialCode, "");
+        return [country, number];
+      }
+
+      // Fallback to default if no match
+      return [COUNTRIES[0], value];
+    }, [value]);
+
     const [searchTerm, setSearchTerm] = React.useState("");
     const [isOpen, setIsOpen] = React.useState(false);
-
-    // Update when external value changes
-    React.useEffect(() => {
-      if (value) {
-        const country = COUNTRIES.find(c => value.startsWith(c.dialCode));
-        if (country) {
-          setSelectedCountry(country);
-          setPhoneNumber(value.replace(country.dialCode, ""));
-        }
-      }
-    }, [value]);
 
     const handleCountryChange = (countryCode: string) => {
       const country = COUNTRIES.find(c => c.code === countryCode);
       if (country) {
-        setSelectedCountry(country);
         setIsOpen(false);
         setSearchTerm("");
         const newValue = country.dialCode + phoneNumber;
@@ -203,7 +204,6 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newPhoneNumber = e.target.value.replace(/[^\d]/g, ""); // Only digits
-      setPhoneNumber(newPhoneNumber);
       const newValue = selectedCountry.dialCode + newPhoneNumber;
       onChange?.(newValue);
     };
@@ -223,8 +223,8 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
     };
 
     return (
-      <div className={cn("w-full", className)}>
-        <div className="flex gap-2 w-full">
+      <InputGroup className={cn("w-full", className)}>
+        <InputGroupAddon>
           <Select
             value={selectedCountry.code}
             onValueChange={handleCountryChange}
@@ -234,7 +234,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           >
             <SelectTrigger
               className={cn(
-                "w-[120px] shrink-0 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all",
+                "w-[50px] border-0 bg-gray-50 focus:ring-0",
                 error && "border-red-500 bg-red-50"
               )}
               style={{
@@ -260,7 +260,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
                     type="text"
                     placeholder="Search countries..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-8 rounded-md border-gray-300 focus:ring-green-500 focus:border-green-500"
                     style={{
                       fontSize: '14px',
@@ -278,7 +278,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
                   )}
                 </div>
               </div>
-              
+
               {/* Country List */}
               <div className="max-h-60 overflow-y-auto py-1">
                 {filteredCountries.length > 0 ? (
@@ -318,29 +318,18 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
               </div>
             </SelectContent>
           </Select>
-
-          <input
-            ref={ref}
-            type="tel"
-            value={phoneNumber}
-            onChange={handlePhoneChange}
-            onBlur={onBlur}
-            placeholder={placeholder}
-            disabled={disabled}
-            required={required}
-            className={cn(
-              "flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50",
-              error && "border-red-500 bg-red-50"
-            )}
-            style={{
-              height: '40px',
-              fontSize: '14px',
-              fontFamily: 'Roboto, sans-serif',
-              fontWeight: 400
-            }}
-          />
-        </div>
-      </div>
+        </InputGroupAddon>
+        <InputGroupInput
+          ref={ref}
+          type="tel"
+          value={phoneNumber}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePhoneChange(e)}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          aria-invalid={error}
+        />
+      </InputGroup>
     );
   }
 );

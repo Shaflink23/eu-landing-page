@@ -46,12 +46,20 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
   const [submissionData, setSubmissionData] = React.useState<any>(null);
 
   const explorerCircleSchema = z.object({
-    keepUpdated: z.boolean().default(true),
+    send_options: z.enum(['bespoke_packages', 'sneak_peek', 'both']),
+    accessibility_dietary_preferences: z.string().optional(),
+    join_early_explorer: z.boolean().default(true),
+    email_opt_in: z.boolean().default(true),
+    keepUpdated: z.boolean().optional() // For backwards compatibility
   });
 
   const form = useForm({
     resolver: zodResolver(explorerCircleSchema),
     defaultValues: {
+      send_options: 'both',
+      accessibility_dietary_preferences: '',
+      join_early_explorer: true,
+      email_opt_in: true,
       keepUpdated: true,
     },
   });
@@ -63,31 +71,27 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Simplified data transformation
-      const companion = initialData.companion;
-      const isGroup = companion === 'friends' || companion === 'family';
-      const groupSize = companion === 'couple' ? 2 : isGroup ? 4 : 1;
-
+      // Unified data collection - forms now use consistent field names
       const completeFormData = {
         name: initialData.name || "",
         email: initialData.email || "",
         phone: initialData.phone || "",
-        country_of_residence: initialData.country || "Unknown",
-        been_to_africa_before: initialData.beenToAfrica === 'yes',
-        travel_style: (initialData.travellerType || ["adventurer"]).slice(0, 3),
-        dream_escape_words: initialData.dreamWords || "",
-        heard_about_us: initialData.hearAbout || 'other',
-        feature_as_pioneer: initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
-        travel_photo_url: initialData.photo || null,
-        travel_month: initialData.startDate ? new Date(initialData.startDate).getMonth() + 1 : new Date().getMonth() + 1,
-        travel_year: initialData.startDate ? new Date(initialData.startDate).getFullYear() : new Date().getFullYear(),
-        preferred_start_date: initialData.startDate || null,
-        preferred_end_date: initialData.endDate || null,
-        group_type: isGroup ? 'group' : companion || 'solo',
-        group_size: groupSize,
-        must_have_experiences: (initialData.experiences || ["gorilla_trekking", "safari_conservation", "spiritual_cultural"]).slice(0, 3),
-        accessibility_dietary_preferences: initialData.preferences || "None",
-        send_options: "both",
+        country_of_residence: initialData.country_of_residence || initialData.country || "Unknown",
+        been_to_africa_before: initialData.been_to_africa_before ?? (initialData.beenToAfrica === 'yes'),
+        travel_style: (initialData.travel_style || initialData.travellerType || ["adventurer"]).slice(0, 3),
+        dream_escape_words: initialData.dream_escape_words || initialData.dreamWords || "",
+        heard_about_us: initialData.heard_about_us || initialData.hearAbout || 'other',
+        feature_as_pioneer: (initialData.feature_as_pioneer || initialData.pioneeerTraveller === 'yes') ? 'yes' : 'maybe_later' as 'yes' | 'maybe_later',
+        travel_photo_url: initialData.travel_photo_url || initialData.photo || null,
+        travel_month: initialData.preferred_start_date ? new Date(initialData.preferred_start_date).getMonth() + 1 : new Date().getMonth() + 1,
+        travel_year: initialData.preferred_start_date ? new Date(initialData.preferred_start_date).getFullYear() : new Date().getFullYear(),
+        preferred_start_date: initialData.preferred_start_date || initialData.startDate || null,
+        preferred_end_date: initialData.preferred_end_date || initialData.endDate || null,
+        group_type: initialData.group_type || initialData.companion || 'solo',
+        group_size: initialData.group_size || initialData.companionCount || 1,
+        must_have_experiences: (initialData.must_have_experiences || initialData.experiences || ["gorilla_trekking", "safari_conservation", "spiritual_cultural"]).slice(0, 3),
+        accessibility_dietary_preferences: initialData.accessibility_dietary_preferences || initialData.preferences || "None",
+        send_options: "both" as const,
         join_early_explorer: true,
         email_opt_in: data.keepUpdated
       };
@@ -198,11 +202,8 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                   Explorer Circle
                 </CardTitle>
                 <CardDescription className="text-base md:text-lg mb-4">
-                  🎉 You're almost done! Join our exclusive community for insider access to Uganda's hidden gems, special offers, and authentic travel stories.
+                  🎉 Final step! Join our community for exclusive Uganda travel updates and hidden gems.
                 </CardDescription>
-                <p className="text-center text-sm text-gray-600 max-w-2xl mx-auto">
-                  Get the inside track on Uganda's best-kept secrets, special rates for community members, and inspiring stories from fellow travelers who've fallen in love with the Pearl of Africa.
-                </p>
               </div>
 
               <div className="flex justify-center mb-12">
@@ -219,10 +220,10 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Keep me updated with the latest Uganda travel stories and offers
+                          Keep me updated with Uganda travel stories and offers
                         </FormLabel>
                         <FormDescription className="text-xs text-gray-600">
-                          Receive monthly newsletters with insider tips, hidden gem locations, and exclusive community member offers. Unsubscribe anytime.
+                          Monthly newsletters with tips and exclusive offers. Unsubscribe anytime.
                         </FormDescription>
                       </div>
                     </FormItem>

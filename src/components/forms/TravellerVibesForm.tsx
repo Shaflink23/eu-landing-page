@@ -137,26 +137,40 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
 
   const form = useForm<TravellerVibesFormData>({
     resolver: zodResolver(travellerVibesSchema),
-    mode: 'onChange', // Enable real-time validation
+    mode: 'onSubmit', // Validate only on submit to avoid conflicts
     defaultValues: {
       name: initialData.name || '',
       email: initialData.email || '',
       phone: initialData.phone || '',
-      country: initialData.country || '',
-      beenToAfrica: initialData.beenToAfrica || '',
-      travellerType: initialData.travellerType || [],
-      hearAbout: initialData.hearAbout || '',
-      pioneeerTraveller: initialData.pioneeerTraveller || '',
-      photo: initialData.photo || '',
+      country_of_residence: initialData.country_of_residence || initialData.country || '',
+      been_to_africa_before: initialData.been_to_africa_before ?? (initialData.beenToAfrica === 'yes'),
+      travel_style: (initialData.travel_style || initialData.travellerType || []).filter((style: string): style is "adventurer" | "cultural_immerser" | "luxe_relaxer" | "off_the_grid" | "mix_of_all" => 
+        ['adventurer', 'cultural_immerser', 'luxe_relaxer', 'off_the_grid', 'mix_of_all'].includes(style as any)
+      ),
+      heard_about_us: initialData.heard_about_us || initialData.hearAbout || '',
+      feature_as_pioneer: initialData.feature_as_pioneer || initialData.pioneeerTraveller === 'yes' ? 'yes' : 'maybe_later',
+      travel_photo_url: initialData.travel_photo_url || initialData.photo || '',
     },
   });
 
-  // Real-time validation monitoring
-  // Console logging removed for production - validation works automatically
+  // Submit validation monitoring
   React.useEffect(() => {
-    // Form validation is handled automatically by React Hook Form
-    // No need for console logs in production
-  }, [form.formState.isValid]);
+    console.log('🔍 FORM WATCH VALUES:', form.watch());
+    console.log('✅ FORM IS VALID:', form.formState.isValid);
+    console.log('❌ FORM ERRORS:', form.formState.errors);
+    console.log('📊 FORM TOUCHED FIELDS:', form.formState.touchedFields);
+    console.log('🔄 FORM DIRTY FIELDS:', form.formState.dirtyFields);
+    console.log('===================');
+  }, [form.formState.isValid, form.formState.errors]); // Validate on submit instead of watch
+
+  // Debug button click
+  const handleDebugSubmit = () => {
+    console.log('🚀 NEXT STEP BUTTON CLICKED');
+    console.log('FORM DATA:', form.getValues());
+    console.log('FORM STATE:', form.formState);
+    console.log('IS VALID?', form.formState.isValid);
+    console.log('===================');
+  };
 
   const handleFileUpload = async (file: File) => {
     setUploadState({ isUploading: true, error: null, uploadedUrl: null });
@@ -178,7 +192,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
         });
         
         // Update form with photo URL
-        form.setValue('photo', uploadedUrl);
+        form.setValue('travel_photo_url', uploadedUrl);
         
         toast.success('Photo uploaded successfully!');
       } else {
@@ -208,9 +222,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full ">
       {/* Main Container - Responsive grid layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Form - Takes up 3 columns on large screens */}
           <div className="lg:col-span-3">
@@ -318,7 +332,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
-                          name="country"
+                          name="country_of_residence"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Country of Residence</FormLabel>
@@ -390,7 +404,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
 
                         <FormField
                           control={form.control}
-                          name="beenToAfrica"
+                          name="been_to_africa_before"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Have you been to Africa before?</FormLabel>
@@ -399,8 +413,8 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                               </FormDescription>
                               <FormControl>
                                 <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                                  onValueChange={(value) => field.onChange(value === 'yes')}
+                                  value={field.value ? 'yes' : 'no'}
                                   className="flex gap-6 pt-2"
                                 >
                                   <div className="flex items-center space-x-2">
@@ -422,7 +436,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       {/* Traveller Type */}
                       <FormField
                         control={form.control}
-                        name="travellerType"
+                        name="travel_style"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>What kind of traveller are you? (Select all that apply) *</FormLabel>
@@ -433,7 +447,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {travellerTypes.map((type) => {
                                   const currentValue = field.value || [];
-                                  const isSelected = currentValue.includes(type.value);
+                                  const isSelected = currentValue.includes(type.value as "adventurer" | "cultural_immerser" | "luxe_relaxer" | "off_the_grid" | "mix_of_all");
                                   
                                   return (
                                     <Button
@@ -443,7 +457,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                                       onClick={() => {
                                         const newValue = isSelected
                                           ? currentValue.filter((value) => value !== type.value)
-                                          : [...currentValue, type.value];
+                                          : [...currentValue, type.value as "adventurer" | "cultural_immerser" | "luxe_relaxer" | "off_the_grid" | "mix_of_all"];
                                         field.onChange(newValue);
                                       }}
                                       className={`justify-start h-12 md:h-10 w-full border-green-300 hover:border-green-400 focus:ring-green-500 focus:border-green-500 ${
@@ -477,7 +491,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       {/* Hear About Us */}
                       <FormField
                         control={form.control}
-                        name="hearAbout"
+                        name="heard_about_us"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>How did you hear about us? (Select one)</FormLabel>
@@ -493,7 +507,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                                 {hearAboutOptions.map((option) => (
                                   <div key={option.value} className="flex items-center space-x-2">
                                     <RadioGroupItem value={option.value} id={`hear-about-${option.value}`} />
-                                    <FormLabel htmlFor={`hear-about-${option.value}`} className="flex items-center gap-3 font-normal cursor-pointer p-3 md:p-2 rounded-md hover:bg-gray-50 min-h-[44px] md:min-h-[32px]">
+                                    <FormLabel htmlFor={`hear-about-${option.value}`} className="flex items-center gap-3 font-normal cursor-pointer p-3 md:p-2 w-full rounded-md hover:bg-gray-50 min-h-[44px] md:min-h-[32px]">
                                       <span className="text-lg md:text-xl">{option.emoji}</span>
                                       <span className="font-medium text-sm md:text-base">{option.label}</span>
                                     </FormLabel>
@@ -509,7 +523,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       {/* Pioneer Traveller */}
                       <FormField
                         control={form.control}
-                        name="pioneeerTraveller"
+                        name="feature_as_pioneer"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Would you like to be featured as a pioneer traveller?</FormLabel>
@@ -527,7 +541,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                                   <FormLabel htmlFor="pioneer-yes" className="font-normal text-sm md:text-base min-h-[44px] flex items-center">Yes, I'd love to be featured!</FormLabel>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="maybe" id="pioneer-maybe" />
+                                  <RadioGroupItem value="maybe_later" id="pioneer-maybe" />
                                   <FormLabel htmlFor="pioneer-maybe" className="font-normal text-sm md:text-base min-h-[44px] flex items-center">Maybe, let me think about it</FormLabel>
                                 </div>
                               </RadioGroup>
@@ -540,7 +554,7 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       {/* Photo Upload */}
                       <FormField
                         control={form.control}
-                        name="photo"
+                        name="travel_photo_url"
                         render={() => (
                           <FormItem>
                             <FormLabel>Upload a travel photo (Optional)</FormLabel>
@@ -598,8 +612,9 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       {/* Submit Button */}
                       <Button
                         type="submit"
+                        onClick={handleDebugSubmit}
                         className="w-full h-12 md:h-10 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700 text-base md:text-sm font-medium"
-                        disabled={!form.formState.isValid || uploadState.isUploading}
+        disabled={uploadState.isUploading}
                       >
                         Next Step →
                       </Button>

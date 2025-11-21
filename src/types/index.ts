@@ -165,7 +165,7 @@ export interface UgandaFormSuccessResponse {
   data: {
     submission_id: number;           // Database ID
     reference_number: string;        // Format: UG20251103XXXX
-    estimated_response_time: string; // "24-48 hours"
+    estimated_response_time: string; // 48 hours"
     next_steps: string[];            // What happens next
   };
 }
@@ -243,7 +243,7 @@ export type FileUploadResponse = FileUploadSuccessResponse | FileUploadErrorResp
 
 import { z } from 'zod';
 
-// Traveller Vibes Form Schema
+// Traveller Vibes Form Schema - Aligned with API format
 export const travellerVibesSchema = z.object({
   name: z.string()
     .min(2, 'Name must be at least 2 characters')
@@ -260,68 +260,90 @@ export const travellerVibesSchema = z.object({
       message: 'Please enter a valid phone number'
     }),
 
-  country: z.string()
-    .min(1, 'Please select your country of residence')
-    .refine((val) => val !== '', 'Please select a valid country'),
+  country_of_residence: z.string().min(1, 'Please select your country of residence'),
 
-  beenToAfrica: z.enum(['yes', 'no'], {
-    message: 'Please indicate if you have been to Africa before'
-  }),
+  been_to_africa_before: z.boolean()
+    .optional(),
 
-  travellerType: z.array(z.string())
+  travel_style: z.array(z.enum(['adventurer', 'cultural_immerser', 'luxe_relaxer', 'off_the_grid', 'mix_of_all']))
     .min(1, 'Please select at least one traveller type')
     .max(3, 'Please select no more than 3 traveller types'),
 
-  hearAbout: z.string()
-    .min(1, 'Please select how you heard about us'),
+  heard_about_us: z.enum(['tiktok', 'instagram', 'word_of_mouth', 'uk_travel_group', 'event_expo', 'other']).optional(),
 
-  pioneeerTraveller: z.enum(['yes', 'maybe'], {
-    message: 'Please indicate your preference for being featured'
-  }),
+  feature_as_pioneer: z.enum(['yes', 'maybe_later'])
+    .optional(),
 
-  photo: z.string()
+  travel_photo_url: z.string()
+    .url('Photo URL must be valid')
     .optional()
-    .refine((val) => !val || val.startsWith('http'), {
-      message: 'Photo URL must be valid'
-    })
+    .or(z.literal(''))
 });
 
-// Dream Trip Form Schema
+// Dream Trip Form Schema - Aligned with API format
 export const dreamTripSchema = z.object({
-  startDate: z.string()
+  preferred_start_date: z.string()
     .min(1, 'Please select a start date')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid start date'),
 
-  endDate: z.string()
+  preferred_end_date: z.string()
     .min(1, 'Please select an end date')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please select a valid end date'),
 
-  experiences: z.array(z.string())
-    .min(3, 'Please select exactly 3 experiences')
-    .max(3, 'Please select exactly 3 experiences'),
+  must_have_experiences: z.array(z.enum([
+    'gorilla_trekking',
+    'community_weaving', 
+    'lakeside_luxe',
+    'food_nightlife',
+    'spiritual_cultural',
+    'safari_conservation',
+    'nile_adventure',
+    'homestays_villages',
+    'birdlife_explorations'
+  ]))
+    .min(1, 'Please select at least one experience')
+    .max(3, 'Please select no more than 3 experiences'),
 
-  companion: z.string()
-    .min(1, 'Please select who is traveling with you'),
+  group_type: z.enum(['solo', 'couple', 'group']),
 
-  companionCount: z.string()
-    .optional(),
+  group_size: z.number()
+    .min(1, 'Please enter your group size'),
 
-  dreamWords: z.string()
+  dream_escape_words: z.string()
     .max(100, 'Dream description must be less than 100 characters')
     .optional()
 }).refine((data) => {
-  // Validate that end date is after start date
-  const start = new Date(data.startDate);
-  const end = new Date(data.endDate);
+  // Cross-field validation: end date must be after start date
+  const start = new Date(data.preferred_start_date);
+  const end = new Date(data.preferred_end_date);
   return end > start;
 }, {
   message: 'End date must be after start date',
-  path: ['endDate']
+  path: ['preferred_end_date']
+}).refine((data) => {
+  // Group type and size validation
+  if (data.group_type === 'solo' && data.group_size !== 1) {
+    return false;
+  }
+  if (data.group_type === 'couple' && data.group_size < 2) {
+    return false;
+  }
+  if (data.group_type === 'group' && data.group_size < 3) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Group size must match group type requirements',
+  path: ['group_size']
 });
 
-// Explorer Circle Form Schema
+// Explorer Circle Form Schema - Aligned with API format
 export const explorerCircleSchema = z.object({
-  keepUpdated: z.boolean()
+  send_options: z.enum(['bespoke_packages', 'sneak_peek', 'both']),
+  accessibility_dietary_preferences: z.string().optional(),
+  join_early_explorer: z.boolean().default(true),
+  email_opt_in: z.boolean().default(true),
+  keepUpdated: z.boolean().optional() // For backwards compatibility
 });
 
 // Complete Form Schema (combination of all steps)
