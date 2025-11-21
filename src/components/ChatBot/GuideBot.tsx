@@ -8,22 +8,56 @@ interface Message {
   time: string;
 }
 
+interface FAQItem {
+  id: number;
+  question: string;
+  answer: string;
+}
+
 const GuideBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [showQuickReplies, setShowQuickReplies] = useState(true);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [currentStep, setCurrentStep] = useState<'welcome' | 'faq-selection' | 'answer' | 'follow-up' | 'resolution' | 'completed'>('welcome');
+  const [selectedFAQ, setSelectedFAQ] = useState<FAQItem | null>(null);
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const phoneNumber = '256755225525';
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+  // FAQ Data
+  const faqData: FAQItem[] = [
+    {
+      id: 1,
+      question: "Do I need a visa to visit Uganda?",
+      answer: "Most travellers do. Uganda's e-visa is quick to apply for online, and some East African citizens are exempt. Always check your nationality on the official immigration portal before you travel."
+    },
+    {
+      id: 2,
+      question: "What's the best time of year to visit?",
+      answer: "Uganda shines all year, but the dry seasons — Dec–Feb and Jun–Aug — give you the smoothest roads and the most wildlife sightings."
+    },
+    {
+      id: 3,
+      question: "Is Uganda safe for travellers?",
+      answer: "Yes, overall. Tourist zones are secure, and operators handle most logistics. Just apply common sense: avoid late-night wandering and keep valuables tucked away."
+    },
+    {
+      id: 4,
+      question: "What are the most common payment methods in Uganda?",
+      answer: "Cash (Ugandan Shillings) rules the streets, cards work in good hotels/restaurants, and mobile money (MTN + Airtel) is the local superstar used for everything from taxis to snacks. Always keep some cash for rural areas."
+    },
+    {
+      id: 5,
+      question: "How do I say basic greetings in the local languages?",
+      answer: "Uganda has many languages, but here are two widely understood:\n\nLuganda: \"Hi\" = Gyebale ko, \"Thank you\" = Webale\nPeople love when visitors try—even if you butcher it beautifully."
+    },
+    {
+      id: 6,
+      question: "Where can I go to experience Uganda at its core?",
+      answer: "Head to places that show everyday Ugandan life and culture at full flavour:\n\n• Local markets (Owino, Nakasero, Entebbe market)\n• Village experiences around Mpigi, Jinja, or Fort Portal\n• Community tourism hubs (Buganda cultural trails, coffee tours, craft workshops)\n• Food experiences — rolex stands, street grills, lake fish spots\n\nThat's where Uganda stops posing for pictures and shows you its real heartbeat."
     }
-  }, [isOpen]);
+  ];
 
   useEffect(() => {
     scrollToBottom();
@@ -60,88 +94,77 @@ const GuideBot = () => {
     }, delay);
   };
 
-
-  const getBotResponse = (userMessage: string) => {
-    const msg = userMessage.toLowerCase();
+  const restartChat = () => {
+    setMessages([]);
+    setCurrentStep('welcome');
+    setSelectedFAQ(null);
+    setConversationHistory([]);
     
-    // Greeting responses
-    if (msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
-      return {
-        response: "Hello, Welcome to Everything Uganda.\n\nMy name is Nambi, your virtual travel assistant, ready to help you plan the perfect Ugandan Experience\n\nHow may I assist you today?",
-        showSuggestions: true
-      };
-    }
-
-    // Tour listing
-
-    // Price inquiries
-
-    // Gorilla trekking
-
-    // Duration-based queries
-
-    // Wildlife tours
-
-    // Specific tour inquiries
-
-    // Queen Elizabeth Park
-
-    // Booking inquiries
-    if (msg.includes('book') || msg.includes('reserve') || msg.includes('interested')) {
-      return {
-        response: "BOOKING INFORMATION\n\nI'd be delighted to help you book your Uganda safari adventure!\n\nTo provide you with personalized service and handle your booking properly, our experienced tour consultants will assist you directly.\n\nThey can help with:\n• Custom itinerary planning\n• Group size accommodations\n• Special dietary requirements\n• Travel date flexibility\n• Payment options\n• Travel insurance advice\n\nClick 'Continue on WhatsApp' below to connect with our booking team for immediate assistance.",
-        showSuggestions: false,
-        showWhatsAppButton: true
-      };
-    }
-
-    // Contact info
-    if (msg.includes('contact') || msg.includes('phone') || msg.includes('call')) {
-      return {
-        response: "CONTACT INFORMATION\n\nPhone: +256 (760) 974544\n\nOur team is available to assist you with:\n• Tour bookings and reservations\n• Custom safari planning\n• Travel advice and recommendations\n• Payment and booking modifications\n\nYou can continue chatting here for general information, or click 'Continue on WhatsApp' for direct booking assistance.",
-        showSuggestions: true
-      };
-    }
-
-    // Default response
-    return {
-      response: "EVERYTHING UGANDA ADVENTURES\n\nWelcome to Uganda's premier safari experience!\n\nI can provide information about:\n\nTOUR PACKAGES\n• Gorilla trekking expeditions\n• Wildlife safari adventures\n• Flying safari experiences\n• Multi-day tour combinations\n\nSERVICES\n• Custom itinerary planning\n• Accommodation arrangements\n• Transport and logistics\n• Professional guide services\n\nWhat specific information would you like to know about our safari packages?",
-      showSuggestions: true
-    };
+    setTimeout(() => {
+      simulateTyping(() => {
+        addMessage("Hello, Welcome to Everything Uganda.\n\nI'm Nambi, your virtual assistant. I can help you with common travel questions about Uganda.\n\nSelect a question to get started:", true);
+        setCurrentStep('faq-selection');
+      }, 1000);
+    }, 500);
   };
 
-  const handleQuickReply = (reply: string) => {
-    setShowQuickReplies(false);
-    addMessage(reply, false);
+  const handleFAQSelect = (faq: FAQItem) => {
+    setSelectedFAQ(faq);
+    setCurrentStep('answer');
+    const questionLog = `Q: ${faq.question}`;
+    setConversationHistory(prev => [...prev, questionLog]);
+    
+    addMessage(faq.question, false);
     
     simulateTyping(() => {
-      const { response, showSuggestions } = getBotResponse(reply);
-      addMessage(response, true);
-      if (showSuggestions) {
-        setTimeout(() => setShowQuickReplies(true), 500);
-      }
+      addMessage(faq.answer, true);
+      setCurrentStep('follow-up');
     }, 1500);
   };
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      setShowQuickReplies(false);
-      addMessage(message, false);
-      const userMsg = message;
-      setMessage('');
-      
+  const handleFollowUp = (answer: 'yes' | 'no') => {
+    if (answer === 'yes') {
+      // User wants another question
+      setCurrentStep('faq-selection');
+      setSelectedFAQ(null);
       simulateTyping(() => {
-        const { response, showSuggestions } = getBotResponse(userMsg);
-        addMessage(response, true);
-        if (showSuggestions) {
-          setTimeout(() => setShowQuickReplies(true), 500);
-        }
+        addMessage("Great! Feel free to ask another question.", true);
+        setTimeout(() => {
+          addMessage("Select another question:", true);
+        }, 500);
+      }, 1000);
+    } else {
+      // User doesn't want another question, check if issue is resolved
+      setCurrentStep('resolution');
+      simulateTyping(() => {
+        addMessage("Has this information resolved your issue?", true);
+      }, 1000);
+    }
+  };
+
+  const handleResolution = (resolved: 'yes' | 'no') => {
+    if (resolved === 'yes') {
+      // Issue resolved - show completion with restart option
+      simulateTyping(() => {
+        addMessage("Excellent! I'm glad I could help.\n\nFor bookings or more detailed assistance, feel free to continue on WhatsApp with our booking team.", true);
+        setTimeout(() => {
+          addMessage("Need help with something else? Start a new conversation!", true);
+        }, 1000);
       }, 1500);
+      
+      // Add restart button after a delay
+      setTimeout(() => {
+        setCurrentStep('completed');
+      }, 3000);
+    } else {
+      // Issue not resolved - redirect to WhatsApp
+      handleWhatsAppRedirect();
     }
   };
 
   const handleWhatsAppRedirect = () => {
-    const encodedMessage = encodeURIComponent("Hello! I'm interested in booking a Uganda safari tour. I've been chatting with your virtual consultant and would like to speak with a booking specialist for personalized assistance.");
+    const conversationText = conversationHistory.join('\n') + `\n\nAdditional Context: User's questions were not fully resolved through the FAQ system.`;
+    const encodedMessage = encodeURIComponent(`Hello! I need assistance with Uganda travel information.\n\nHere's my conversation history:\n${conversationText}\n\nI would like to speak with a travel consultant for personalized help.`);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -151,33 +174,80 @@ const GuideBot = () => {
     if (!isOpen && messages.length === 0) {
       setTimeout(() => {
         simulateTyping(() => {
-          addMessage("Hello, Welcome to Everything Uganda.\n\nMy name is Nambi, your virtual travel assistant, ready to help you plan the perfect Ugandan Experience\n\nHow may I assist you today?", true);
-          setTimeout(() => setShowQuickReplies(true), 500);
+          addMessage("Hello, Welcome to Everything Uganda.\n\nI'm Nambi, your virtual assistant. I can help you with common travel questions about Uganda.\n\nSelect a question to get started:", true);
+          setCurrentStep('faq-selection');
         }, 1000);
       }, 500);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+  const renderFAQButtons = () => (
+    <div className="mt-3 animate-in slide-in-from-bottom-2 duration-300">
+      <div className="grid grid-cols-1 gap-1.5">
+        {faqData.map((faq) => (
+          <button
+            key={faq.id}
+            className="bg-white border border-gray-200 px-3 py-2.5 rounded-lg text-xs text-left transition-all hover:bg-gray-50 hover:border-green-500 hover:shadow-sm"
+            onClick={() => handleFAQSelect(faq)}
+          >
+            {faq.question}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
-  const quickReplies = [
-    "Show me available tour packages",
-    "Gorilla trekking information", 
-    "Budget-friendly safari options",
-    "I want to make a booking"
-  ];
+  const renderFollowUpButtons = () => (
+    <div className="mt-3 animate-in slide-in-from-bottom-2 duration-300">
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+          onClick={() => handleFollowUp('yes')}
+        >
+          Yes
+        </button>
+        <button
+          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+          onClick={() => handleFollowUp('no')}
+        >
+          No
+        </button>
+      </div>
+      <p className="text-xs text-gray-500 mt-2 px-1">Would you like to ask another question?</p>
+    </div>
+  );
 
-  const suggestions = [
-    "Tell me about Murchison Falls tours",
-    "What wildlife will I see?",
-    "3-day safari packages", 
-    "Luxury flying safari options"
-  ];
+  const renderResolutionButtons = () => (
+    <div className="mt-3 animate-in slide-in-from-bottom-2 duration-300">
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+          onClick={() => handleResolution('yes')}
+        >
+          Yes, Resolved
+        </button>
+        <button
+          className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+          onClick={() => handleResolution('no')}
+        >
+          No, Need Help
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderCompletionButtons = () => (
+    <div className="mt-3 animate-in slide-in-from-bottom-2 duration-300">
+      <div className="grid grid-cols-1 gap-2">
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-lg text-xs font-medium transition-all"
+          onClick={restartChat}
+        >
+          Start New Conversation
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -212,7 +282,7 @@ const GuideBot = () => {
               <h4 className="text-sm font-semibold m-0">Everything Uganda</h4>
               <div className="text-xs opacity-90 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0"></span>
-                <span>Nambi your Virtual Assistant</span>
+                <span>Nambi - FAQ Assistant</span>
               </div>
             </div>
             <button 
@@ -252,61 +322,25 @@ const GuideBot = () => {
                       <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                       <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
                     </div>
-                    <span className="text-xs text-gray-500">Safari consultant is typing...</span>
+                    <span className="text-xs text-gray-500">Assistant is typing...</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {showQuickReplies && messages.length > 0 && (
-              <div className="mt-3 animate-in slide-in-from-bottom-2 duration-300">
-                <p className="text-xs text-gray-500 mb-2 px-1">Suggested questions:</p>
-                <div className="grid grid-cols-1 gap-1.5">
-                  {(messages.length === 1 ? quickReplies : suggestions).map((reply, index) => (
-                    <button
-                      key={index}
-                      className="bg-white border border-gray-200 px-3 py-2.5 rounded-lg text-xs text-left transition-all hover:bg-gray-50 hover:border-green-500 hover:shadow-sm"
-                      onClick={() => handleQuickReply(reply)}
-                    >
-                      {reply}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Dynamic Button Rendering */}
+            {currentStep === 'faq-selection' && renderFAQButtons()}
+            {currentStep === 'follow-up' && renderFollowUpButtons()}
+            {currentStep === 'resolution' && renderResolutionButtons()}
+            {currentStep === 'completed' && renderCompletionButtons()}
 
             <div ref={messagesEndRef} />
           </div>
 
           <div className="bg-white border-t border-gray-100 p-3 flex-shrink-0">
-            <div className="flex items-end gap-2 bg-gray-50 rounded-2xl px-3 py-2">
-              <textarea
-                ref={inputRef}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about safari packages..."
-                rows={1}
-                className="flex-1 bg-transparent border-none outline-none resize-none text-xs leading-5 max-h-20 py-1 placeholder-gray-500"
-              />
-              <button 
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${
-                  message.trim() 
-                    ? 'bg-green-600 text-white hover:bg-green-700 hover:scale-105' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                onClick={handleSendMessage}
-                disabled={!message.trim()}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-            
             <button
               onClick={handleWhatsAppRedirect}
-              className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.473 3.516"/>
@@ -338,7 +372,7 @@ const GuideBot = () => {
               <svg viewBox="0 0 24 24" width="20" height="20" className="text-white flex-shrink-0">
                 <path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.473 3.516"/>
               </svg>
-              <span className="text-white font-medium text-sm whitespace-nowrap">Chat with Us</span>
+              <span className="text-white font-medium text-sm whitespace-nowrap">FAQ Assistant</span>
             </>
           )}
         </button>
