@@ -204,7 +204,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   React.useEffect(() => {
     // Monitor form validation state for debugging
     if (Object.keys(form.formState.errors).length > 0) {
-      console.log('Form validation errors:', form.formState.errors);
+      //console.log('Form validation errors:', form.formState.errors);
     }
   }, [form.formState.isValid, form.formState.errors]);
 

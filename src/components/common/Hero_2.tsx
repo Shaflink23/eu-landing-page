@@ -9,7 +9,7 @@ export const Hero_2 = () => {
   React.useEffect(() => {
     if (videoRef.current) {
       videoRef.current.play().catch((error) => {
-        console.log("Video autoplay failed:", error);
+        //console.log("Video autoplay failed:", error);
       });
     }
   }, []);

@@ -59,7 +59,7 @@ export const ContactPage = () => {
   });
 
   const onSubmit = async (data: ContactFormData) => {
-    console.log('Contact form submitted:', data);
+    //console.log('Contact form submitted:', data);
     setIsSubmitted(true);
     reset();
     

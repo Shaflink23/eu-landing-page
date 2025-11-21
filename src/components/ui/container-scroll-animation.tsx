@@ -29,7 +29,7 @@ export const ContainerScroll = ({
   // Debug scroll progress
   React.useEffect(() => {
     const unsubscribe = scrollYProgress.onChange((value) => {
-      console.log("Map scroll progress:", value.toFixed(3));
+      //console.log("Map scroll progress:", value.toFixed(3));
     });
     return () => unsubscribe();
   }, [scrollYProgress]);

@@ -236,7 +236,7 @@ export const ExplorerCircleForm: React.FC<ExplorerCircleFormProps> = ({
                   <div className="font-bold mb-2 text-red-800">Submission Error:</div>
                   <div className="whitespace-pre-wrap text-red-700">{errorMessage}</div>
                   <div className="mt-3 text-xs text-red-600">
-                    Please check the browser console (F12) for more details, or contact support if the issue persists.
+                    Please check the browser //console (F12) for more details, or contact support if the issue persists.
                   </div>
                 </div>
               )}

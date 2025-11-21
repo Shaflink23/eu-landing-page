@@ -155,21 +155,21 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
 
   // Submit validation monitoring
   React.useEffect(() => {
-    console.log('🔍 FORM WATCH VALUES:', form.watch());
-    console.log('✅ FORM IS VALID:', form.formState.isValid);
-    console.log('❌ FORM ERRORS:', form.formState.errors);
-    console.log('📊 FORM TOUCHED FIELDS:', form.formState.touchedFields);
-    console.log('🔄 FORM DIRTY FIELDS:', form.formState.dirtyFields);
-    console.log('===================');
+    //console.log('🔍 FORM WATCH VALUES:', form.watch());
+    //console.log('✅ FORM IS VALID:', form.formState.isValid);
+    //console.log('❌ FORM ERRORS:', form.formState.errors);
+    //console.log('📊 FORM TOUCHED FIELDS:', form.formState.touchedFields);
+    //console.log('🔄 FORM DIRTY FIELDS:', form.formState.dirtyFields);
+    //console.log('===================');
   }, [form.formState.isValid, form.formState.errors]); // Validate on submit instead of watch
 
   // Debug button click
   const handleDebugSubmit = () => {
-    console.log('🚀 NEXT STEP BUTTON CLICKED');
-    console.log('FORM DATA:', form.getValues());
-    console.log('FORM STATE:', form.formState);
-    console.log('IS VALID?', form.formState.isValid);
-    console.log('===================');
+    //console.log('🚀 NEXT STEP BUTTON CLICKED');
+    //console.log('FORM DATA:', form.getValues());
+    //console.log('FORM STATE:', form.formState);
+    //console.log('IS VALID?', form.formState.isValid);
+    //console.log('===================');
   };
 
   const handleFileUpload = async (file: File) => {
