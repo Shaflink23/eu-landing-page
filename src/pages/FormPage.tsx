@@ -62,19 +62,20 @@ export const FormPage = () => {
       {/* Smaller Hero Section */}
       <SmallerHero />
 
-      {/* Form Content */}
-      <div className="flex-1 py-8 md:py-12 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-sm p-6 md:p-10">
+      {/* Form Content - Mobile-first optimized */}
+      <div className="flex-1 py-6 px-4 sm:px-6 lg:px-8 ">
+        <div className="w-full max-w-4xl mx-auto ">
+          <div className="bg-white overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3 }} 
               >
                 {renderStep()}
+               
               </motion.div>
             </AnimatePresence>
           </div>

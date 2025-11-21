@@ -169,7 +169,7 @@ interface PhoneInputProps {
 }
 
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value = "", onChange, onBlur, placeholder = "Enter phone number", className, error = false, disabled = false, required = false, label }, ref) => {
+  ({ value = "", onChange, onBlur, placeholder = "Enter phone number", className, error = false, disabled = false, required = false }, ref) => {
     const [selectedCountry, setSelectedCountry] = React.useState(
       COUNTRIES.find(country => value.startsWith(country.dialCode)) || COUNTRIES[0]
     );

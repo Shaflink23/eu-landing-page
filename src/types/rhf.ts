@@ -45,6 +45,7 @@ export const dreamTripSchema = z.object({
     .refine((date) => {
       const selectedDate = new Date(date);
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
       const minDate = new Date(today);
       minDate.setDate(today.getDate() + 20); // 20 days from today
       return selectedDate >= minDate;
@@ -53,8 +54,8 @@ export const dreamTripSchema = z.object({
   endDate: z.string()
     .min(1, 'Please select an end date')
     .refine((endDate) => {
-      // This will be validated against startDate in the context
-      return new Date(endDate) instanceof Date && !isNaN(new Date(endDate).getTime());
+      const end = new Date(endDate);
+      return end instanceof Date && !isNaN(end.getTime());
     }, 'Please select a valid end date'),
 
   experiences: z.array(z.string())
@@ -75,6 +76,17 @@ export const dreamTripSchema = z.object({
   dreamWords: z.string()
     .max(100, 'Description must be less than 100 characters')
     .optional()
+}).refine((data) => {
+  // Cross-field validation: end date must be after start date
+  if (data.startDate && data.endDate) {
+    const start = new Date(data.startDate);
+    const end = new Date(data.endDate);
+    return end > start;
+  }
+  return true;
+}, {
+  message: 'End date must be after start date',
+  path: ['endDate']
 });
 
 // Export types for use in components
