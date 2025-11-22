@@ -31,16 +31,16 @@ export default function Sponsors() {
                         <BlurredInfiniteSlider
                             speedOnHover={20}
                             speed={40}
-                            gap={100}
+                            gap={40}
                             fadeWidth={80}
                         >
                             {SPONSOR_LOGOS.map((logo, index) => (
-                                <div key={`${logo.src}-${index}`} className="flex items-center">
+                                <div key={`${logo.src}-${index}`} className="flex items-center justify-center px-2">
                                     <img
-                                        className="mx-auto w-fit grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 object-contain"
+                                        className="grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 object-contain"
                                         src={logo.src}
                                         alt={logo.alt}
-                                        style={{ height: `${logo.height}px`, maxWidth: '140px' }}
+                                        style={{ height: `${logo.height}px`, width: 'auto', maxWidth: '120px' }}
                                         loading="lazy"
                                     />
                                 </div>

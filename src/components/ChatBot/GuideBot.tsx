@@ -5,6 +5,7 @@ interface Message {
   content: string;
   isBot: boolean;
   isTyping: boolean;
+  isSuccess?: boolean;
   time: string;
 }
 
@@ -75,12 +76,13 @@ const GuideBot = () => {
     });
   };
 
-  const addMessage = (content: string, isBot = false, isTyping = false) => {
-    const newMessage = {
+  const addMessage = (content: string, isBot = false, isTyping = false, isSuccess = false) => {
+    const newMessage: Message = {
       id: Date.now(),
       content,
       isBot,
       isTyping,
+      isSuccess,
       time: getCurrentTime()
     };
     setMessages(prev => [...prev, newMessage]);
@@ -128,9 +130,10 @@ const GuideBot = () => {
       setCurrentStep('faq-selection');
       setSelectedFAQ(null);
       simulateTyping(() => {
-        addMessage("Great! Feel free to ask another question.", true);
+        addMessage("Great — glad that helped.", true);
         setTimeout(() => {
-          addMessage("Select another question:", true);
+          // success bubble to indicate the question was completed
+          addMessage("Select another question:", true, false, true);
         }, 500);
       }, 1000);
     } else {
@@ -213,7 +216,7 @@ const GuideBot = () => {
           No
         </button>
       </div>
-      <p className="text-xs text-gray-500 mt-2 px-1">Would you like to ask another question?</p>
+      <p className="text-xs text-gray-500 mt-2 px-1">Would you like to select another question?</p>
     </div>
   );
 
@@ -300,8 +303,10 @@ const GuideBot = () => {
               <div key={msg.id} className={`flex mb-3 ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
                 <div className="max-w-[85%]">
                   <div className={`px-3 py-2 rounded-xl text-xs leading-relaxed shadow-sm whitespace-pre-line ${
-                    msg.isBot 
-                      ? 'bg-white text-gray-800 rounded-bl-sm' 
+                    msg.isSuccess
+                      ? 'bg-green-600 text-white rounded-bl-sm'
+                      : msg.isBot
+                      ? 'bg-white text-gray-800 rounded-bl-sm'
                       : 'bg-green-600 text-white rounded-br-sm'
                   } animate-in slide-in-from-bottom-1 duration-200`}>
                     {msg.content}

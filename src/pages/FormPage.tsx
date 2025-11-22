@@ -64,7 +64,7 @@ export const FormPage = () => {
 
       {/* Form Content - Mobile-first optimized */}
       <div className="flex-1 py-6 px-4 sm:px-6 lg:px-8 ">
-        <div className="w-full max-w-4xl mx-auto ">
+        <div className="w-full max-w-7xl mx-auto ">
           <div className="bg-white overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div

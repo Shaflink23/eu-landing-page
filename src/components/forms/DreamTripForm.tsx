@@ -271,10 +271,10 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
   return (
     <div className="w-full">
       {/* Main Container - Responsive grid layout matching TravellerVibesForm */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-8xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Main Form - Takes up 3 columns on large screens */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <div className="space-y-6">
               <Card className="w-full">
                 <CardHeader>
@@ -433,7 +433,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                                       >
                                         {/* Experience Card */}
                                         <div
-                                          className={`h-[320px] md:h-[400px] p-3 md:p-5 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
+                                          className={`mt-3 h-[300px] md:h-[300px] p-3 md:p-5 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
                                             isSelected
                                               ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg'
                                               : canSelect
@@ -466,7 +466,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
                                             {!isSelected && (
                                               <div className="text-center mb-2">
                                                 <span className="text-xs text-green-600 font-medium">
-                                                  📱 Tap to select
+                                                  Tap to select
                                                 </span>
                                               </div>
                                             )}
@@ -728,7 +728,7 @@ export const DreamTripForm: React.FC<DreamTripFormProps> = ({
           </div>
 
           {/* Desktop Sidebar - Takes up 1 column on large screens */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block lg:col-span-1">
             <div className="space-y-6">
               <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                 <CardContent className="p-6">

@@ -434,6 +434,17 @@ export const TravellerVibesForm: React.FC<TravellerVibesFormProps> = ({
                       </div>
 
                       {/* Traveller Type */}
+                      {/* Divider after Personal Info to create a short-form illusion */}
+                      <div className="my-4 flex items-center" aria-hidden>
+                        <div className="flex-1 h-px bg-gray-200" />
+                        <div className="mx-3 inline-flex items-center gap-2 text-xs text-gray-600">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-green-600">
+                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          <span className="font-medium text-xs text-gray-700">Personal info complete</span>
+                        </div>
+                        <div className="flex-1 h-px bg-gray-200" />
+                      </div>
                       <FormField
                         control={form.control}
                         name="travel_style"
